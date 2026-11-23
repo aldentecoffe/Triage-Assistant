@@ -269,7 +269,12 @@ def discrepancies(combined: pd.DataFrame) -> pd.DataFrame:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--labels", default="data/annotation")
-    parser.add_argument("--data", default="data/processed/incidents_validation_v1.1.csv")
+    parser.add_argument(
+        "--data",
+        nargs="+",
+        default=["data/interim/incidents_clean_v1.1.csv"],
+        help="файлы с метками набора; нужны и train, и validation, если карточки взяты из обеих",
+    )
     args = parser.parse_args()
 
     folder = Path(args.labels)
@@ -277,10 +282,11 @@ def main() -> int:
         first = collect(read_sheet(folder / "pass_a.csv"))
         second = collect(read_sheet(folder / "pass_b.csv"))
         key = read_key(folder / "key.csv")
-        answers = pd.read_csv(args.data, dtype=str, keep_default_na=False)
+        frames = [pd.read_csv(path, dtype=str, keep_default_na=False) for path in args.data]
+        answers = pd.concat(frames, ignore_index=True).drop_duplicates(subset="incident_id")
         missing = {"incident_id", *ALLOWED} - set(answers.columns)
         if missing:
-            raise ValueError(f"в {args.data} нет колонок {sorted(missing)}")
+            raise ValueError(f"в файлах меток нет колонок {sorted(missing)}")
         gold = answers[["incident_id", *ALLOWED]]
         combined = combine(first, second, key, gold)
     except (OSError, ValueError, KeyError) as error:

@@ -4,7 +4,10 @@
 `python src/annotation_sheet.py --count 30 --repeat 10` и пересоздаются с `--force`.
 
 Пилот сокращён до 30 карточек и 10 повторных по согласованию с преподавателем.
-Статус и ограничения — в [результатах](../../docs/lab6/annotation_results.md).
+Результаты и разбор — в [результатах](../../docs/lab6/annotation_results.md).
+
+Формы можно пересобрать, не трогая заполненные листы:
+`python src/annotation_sheet.py --forms-only`.
 
 | Файл | Что внутри |
 |---|---|

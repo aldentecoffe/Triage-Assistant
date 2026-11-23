@@ -117,6 +117,9 @@ FORM_TEMPLATE = Template(
   aside section { background: #fff; border: 1px solid #d9d9d4; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
   aside ul { margin: 6px 0 0; padding-left: 18px; }
   aside li { margin-bottom: 4px; }
+  aside table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  aside th, aside td { border-top: 1px solid #e2e2dc; padding: 5px 4px; text-align: left; vertical-align: top; }
+  aside th { border-top: none; color: #4a4a44; font-weight: 600; }
   code { font: 12px ui-monospace, monospace; background: #efefeb; padding: 1px 4px; border-radius: 4px; }
   .empty { border-color: #b4552d; }
   @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
@@ -186,14 +189,15 @@ FORM_TEMPLATE = Template(
   </section>
   <aside>
     <section>
-      <h2>Коротко о критичности</h2>
-      <ul>
-        <li><code>P1</code> — голос и регистрация в сети, платежи или магистраль не работают, обходного пути нет.</li>
-        <li><code>P2</code> — функция не выполняется для части, недоступна отдельная функция или интеграция, клиент видит ошибку.</li>
-        <li><code>P3</code> — деградация, задержка, очередь, часть ассортимента; обходной путь есть.</li>
-        <li><code>P4</code> — абоненты не затронуты: мониторинг, отчётность, справочники, самовосстановление.</li>
-        <li><code>спорный</code> — правило молчит; опишите оба чтения в комментарии.</li>
-      </ul>
+      <h2>Таблица решений по критичности</h2>
+      <table>
+        <tr><th>Метка</th><th>Когда</th></tr>
+        <tr><td><code>P1</code></td><td>Голос и регистрация в сети, платежи или магистраль не работают, обхода нет. Заказы, процессинг и интеграции сюда не входят.</td></tr>
+        <tr><td><code>P2</code></td><td>Функция не выполняется для части; остановлен заказ или интеграция; клиент видит ошибку, неверный счёт или нулевой баланс; операция не завершается по таймауту.</td></tr>
+        <tr><td><code>P3</code></td><td>Медленно, но завершается; очередь; часть ассортимента; обход есть: резерв, повтор, ручное оформление, 3G вместо VoLTE.</td></tr>
+        <tr><td><code>P4</code></td><td>Клиент не затронут: сверка, отчёты, справочники, мониторинг, самовосстановление. Если клиент видит ошибку — это не P4.</td></tr>
+      </table>
+      <p style="margin:8px 0 0">Одинаковые по смыслу последствия на русском и английском получают одну метку. Правило молчит — ставьте «спорный».</p>
     </section>
     <section>
       <h2>Порядок</h2>
@@ -354,9 +358,31 @@ def main() -> int:
     parser.add_argument("--repeat", type=int, default=30)
     parser.add_argument("--seed", type=int, default=SEED)
     parser.add_argument("--force", action="store_true", help="перезаписать заполненные листы")
+    parser.add_argument(
+        "--forms-only",
+        action="store_true",
+        help="пересобрать только HTML-формы из уже заполненных листов, CSV не трогать",
+    )
     args = parser.parse_args()
 
     paths = {name: Path(args.outdir) / name for name in ("pass_a.csv", "pass_b.csv", "key.csv")}
+
+    if args.forms_only:
+        try:
+            sheet_a = pd.read_csv(paths["pass_a.csv"], dtype=str, keep_default_na=False)
+            sheet_b = pd.read_csv(paths["pass_b.csv"], dtype=str, keep_default_na=False)
+        except OSError as error:
+            print(f"Ошибка чтения листов: {error}")
+            return 1
+        for name, sheet, title, csv_name, key in (
+            ("form_a.html", sheet_a, f"Проход A · {len(sheet_a)} карточек", "pass_a.csv", "annotation-pass-a"),
+            ("form_b.html", sheet_b, f"Проход B · {len(sheet_b)} карточек", "pass_b.csv", "annotation-pass-b"),
+        ):
+            path = Path(args.outdir) / name
+            path.write_text(build_form(sheet, title, csv_name, key), encoding="utf-8")
+            print(f"форма: {path}")
+        return 0
+
     if args.count < 1 or args.repeat < 1:
         print("Ошибка: --count и --repeat должны быть больше нуля")
         return 1

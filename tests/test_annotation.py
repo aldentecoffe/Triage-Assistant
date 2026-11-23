@@ -246,3 +246,21 @@ def test_cli_writes_forms_next_to_the_sheets(
         text = (outdir / name).read_text(encoding="utf-8")
         assert "const CARDS = " in text
         assert "Скачать CSV" in text
+
+
+def test_forms_only_keeps_filled_sheets(
+    source: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """--forms-only пересобирает формы из готовых листов и не трогает CSV."""
+    outdir = tmp_path / "annotation"
+    assert _run(monkeypatch, *_cli_args(source, outdir, count=12, repeat=4)) == 0
+    first = pd.read_csv(outdir / "pass_a.csv", dtype=str, keep_default_na=False)
+    first.loc[0, "severity"] = "P1"
+    first.to_csv(outdir / "pass_a.csv", index=False, encoding="utf-8-sig")
+
+    code = _run(monkeypatch, "--forms-only", "--outdir", str(outdir))
+
+    assert code == 0
+    kept = pd.read_csv(outdir / "pass_a.csv", dtype=str, keep_default_na=False)
+    assert kept.loc[0, "severity"] == "P1"
+    assert "Таблица решений" in (outdir / "form_a.html").read_text(encoding="utf-8")
