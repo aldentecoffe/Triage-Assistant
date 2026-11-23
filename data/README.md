@@ -40,6 +40,8 @@ UTF-8. Единица анализа — карточка одного инци�
 
 Типы, допустимые значения и разбор персональных данных: [docs/lab4/schema.md](../docs/lab4/schema.md).
 Состав, ограничения и репрезентативность: [docs/lab4/data_card.md](../docs/lab4/data_card.md).
+Проверки качества и анализ: [docs/lab5/quality_review.md](../docs/lab5/quality_review.md),
+версия Data Card 1.1: [docs/lab5/data_card_update.md](../docs/lab5/data_card_update.md).
 
 ## Таксономия версии 1.0
 
@@ -68,8 +70,10 @@ data/
 python src/generate_incidents.py --count 6000
 python src/prepare_dataset.py
 python src/split_dataset.py
+python src/eda_incidents.py
 python -m pytest tests -q
 ```
 
 Генератор детерминирован: seed 20261123, версия набора 1.0. Данные в репозиторий
-не коммитятся.
+не коммитятся. `eda_incidents.py` не меняет файлы данных: он пишет только таблицу проверок
+и графики в `docs/lab5/`.

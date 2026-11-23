@@ -9,9 +9,10 @@ ML-сервис автоматического триажа инцидентов
 
 Лабораторные 1–2 — проектирование и организация работы: [проектный план](docs/project-plan.md),
 [команда и роли](docs/team-and-roles.md). Лабораторная 3 — ноутбук по CRISP-DM на данных
-Wine Quality. Лабораторная 4 — данные проекта: реестр источников, схема, Data Card v1,
-стратегия разделения и генератор на 6 000 записей. Код сервиса и модели появятся
-в лабораторных 5–8.
+Wine Quality. Лабораторная 4 — данные проекта: реестр источников, схема, Data Card v1, стратегия
+разделения и генератор на 6 000 записей. Лабораторная 5 — разведочный анализ и проверки
+качества: 19 проверок, восемь графиков, Data Card 1.1. Код сервиса и модели появятся
+в лабораторных 6–8.
 
 ## Учебные ноутбуки
 
@@ -19,6 +20,12 @@ Wine Quality. Лабораторная 4 — данные проекта: рее
   [notebooks/lab3_wine_quality.ipynb](notebooks/lab3_wine_quality.ipynb). Задача — предсказать
   попадание вина в категорию `quality >= 7` и оценить балл комиссии. В ноутбуке все шесть фаз
   CRISP-DM, метрики на отложенной выборке, разбор ошибок и сохранение пайплайна.
+- Лабораторная 5, разведочный анализ инцидентов:
+  [notebooks/lab5_incident_eda.ipynb](notebooks/lab5_incident_eda.ipynb). Восемь вопросов,
+  19 проверок качества, восемь визуализаций с интерпретацией, просмотр проблемных карточек,
+  проверка proxy-признаков и утечек, обновление Data Card. Логика — в
+  [src/eda_incidents.py](src/eda_incidents.py), таблица проверок — в
+  [docs/lab5/quality_review.md](docs/lab5/quality_review.md).
 
 ## Проблема
 
@@ -106,8 +113,12 @@ JSON-ответ + топ похожих инцидентов
 python src/generate_incidents.py --count 6000
 python src/prepare_dataset.py
 python src/split_dataset.py
+python src/eda_incidents.py
 python -m pytest tests -q
 ```
+
+`eda_incidents.py` печатает таблицу из 19 проверок, пишет `docs/lab5/quality_checks.csv`
+и восемь графиков в `docs/lab5/figures`; файлы данных он не меняет.
 
 Подробнее: [data/README.md](data/README.md).
 
@@ -152,6 +163,9 @@ uvicorn src.api.main:app --reload
 - [Политика данных](data/README.md)
 - Лабораторная 4: [реестр источников](docs/lab4/sources.md), [схема данных](docs/lab4/schema.md),
   [Data Card](docs/lab4/data_card.md), [стратегия разделения, разметка и план B](docs/lab4/split_and_plan.md)
+- Лабораторная 5: [как запустить анализ](docs/lab5/eda_run.md),
+  [проверки качества и примеры](docs/lab5/quality_review.md),
+  [обновление Data Card до 1.1](docs/lab5/data_card_update.md)
 
 ## Ограничения
 
