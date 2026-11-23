@@ -1,0 +1,23 @@
+{
+  "feature_version": "1.0",
+  "text_column": "description",
+  "params": {
+    "analyzer": "word",
+    "lowercase": true,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 2,
+    "max_features": 20000,
+    "sublinear_tf": true
+  },
+  "vocabulary_size": 3799,
+  "vocabulary_sha256": "44c848662e62332db0c179052fa1b8846e3fccb10e0da4c78dcfc601f228574e",
+  "rows": {
+    "train": 3600,
+    "validation": 1200,
+    "test": 1200
+  },
+  "features": 3799
+}
