@@ -535,6 +535,10 @@ def test_report_compares_each_pass_with_the_dataset(combined: pd.DataFrame) -> N
     """Вторая таблица: у прохода A три сравнения, у прохода B — два."""
     text = agreement.report(combined)
 
+    assert (
+        "| Метка | Проход A: сравнено | Проход A: доля | "
+        "Проход B: сравнено | Проход B: доля |" in text
+    )
     row = _row_after(text, "### Сверка с метками набора", "Критичность")
 
     assert row == ["Критичность", "3", "0,667", "2", "1,000"]
@@ -546,6 +550,7 @@ def test_report_prints_quadratic_kappa_for_severity_only(
     """Квадратичная каппа заполнена только для критичности, у сервиса и причины — «—»."""
     text = agreement.report(combined)
 
+    assert "Квадратичная каппа" in text
     severity = _row_after(text, "### Согласие первого и второго прохода", "Критичность")
     service = _row_after(text, "### Согласие первого и второго прохода", "Сервис")
     cause = _row_after(text, "### Согласие первого и второго прохода", "Категория причины")
@@ -756,3 +761,37 @@ def test_cli_stops_when_data_lacks_incident_id(
     assert _run_cli(monkeypatch, labels, gold_path) == 1
 
     assert "incident_id" in _cli_error(capsys)
+
+def test_combine_keeps_every_card_when_second_pass_is_empty(pilot_frames) -> None:
+    """Пустой второй проход: все карточки A на месте, состояния B — empty, без предупреждений."""
+    first, _, key, gold = pilot_frames
+    empty_second = _sheet([], [], [], [])
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        combined = agreement.combine(
+            agreement.collect(first), agreement.collect(empty_second), key, gold
+        )
+
+    assert len(combined) == len(first)
+    assert set(combined["severity_state_b"]) == {"empty"}
+    assert combined["severity_label_b"].isna().all()
+
+
+def test_combine_rejects_second_pass_card_missing_in_the_first(pilot_frames) -> None:
+    """Ключ, ведущий во второй проход на чужой incident_id, не должен молча терять карточку."""
+    first, second, key, gold = pilot_frames
+    broken = key.copy()
+    broken.loc[broken["pass_name"] == "b", "incident_id"] = "I999"
+
+    with pytest.raises(ValueError, match="во втором листе"):
+        agreement.combine(agreement.collect(first), agreement.collect(second), broken, gold)
+
+
+def test_read_key_rejects_unknown_pass_name(tmp_path: Path) -> None:
+    path = tmp_path / "key.csv"
+    frame = _key({"A001": "I1"}, "a").assign(pass_name="c")
+    frame.to_csv(path, index=False, encoding="utf-8-sig")
+
+    with pytest.raises(ValueError, match="неизвестные проходы"):
+        agreement.read_key(path)

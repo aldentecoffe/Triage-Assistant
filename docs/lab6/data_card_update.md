@@ -63,8 +63,10 @@
 `min_df=2`, `max_features=20000`, `sublinear_tf=True`. Признак один — `description`.
 
 Отпечаток подготовки: словарь 3 799 признаков, sha256 `44c84866…228574e`,
-манифест — [features_manifest.json](features_manifest.json). Тест `test_idf_ignores_test`
-меняет описания в validation и test и проверяет, что словарь и IDF не изменились.
+манифест — [features_manifest.json](features_manifest.json). Тест
+`test_validation_and_test_texts_do_not_change_idf` меняет описания в validation и test
+и проверяет, что словарь и IDF не изменились; `test_committed_manifest_matches_the_code`
+ловит расхождение закоммиченного манифеста с кодом.
 
 ## Ограничения
 

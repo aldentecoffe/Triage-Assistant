@@ -86,6 +86,9 @@ def read_key(path: str | Path) -> pd.DataFrame:
     if duplicates.any():
         cards = frame.loc[duplicates, "card"].tolist()[:5]
         raise ValueError(f"в ключе повторяются номера карточек: {cards}")
+    unknown = sorted(set(frame["pass_name"]) - {"a", "b"})
+    if unknown:
+        raise ValueError(f"в ключе неизвестные проходы {unknown}: ожидаются a и b")
     return frame
 
 
@@ -134,11 +137,17 @@ def combine(first: pd.DataFrame, second: pd.DataFrame, key: pd.DataFrame, gold: 
     """
     left = prepare_side(first, key, "a")
     right = prepare_side(second, key, "b")
+    lost = right.loc[~right["incident_id"].isin(set(left["incident_id"])), "card"].tolist()
+    if lost:
+        raise ValueError(
+            f"во втором листе есть карточки, которых нет в первом: {['B:' + card for card in lost]}"
+        )
     keep = ["incident_id", *[f"{column}_label_b" for column in ALLOWED], *[f"{column}_state_b" for column in ALLOWED]]
     combined = left.merge(right[keep], on="incident_id", how="left", validate="one_to_one")
     combined = attach_gold(combined, gold)
     for column in ALLOWED:
-        combined[f"{column}_state_b"] = combined[f"{column}_state_b"].fillna("empty")
+        states = combined[f"{column}_state_b"].astype(object)
+        combined[f"{column}_state_b"] = states.where(states.notna(), "empty")
     return combined
 
 
