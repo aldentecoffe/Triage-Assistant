@@ -219,3 +219,19 @@ def test_cli_returns_error_code_on_crossed_splits(
 
     assert features.main() == 1
     assert not manifest_path.exists()
+
+def test_committed_manifest_matches_the_code(default_splits: dict[str, pd.DataFrame]) -> None:
+    """Закоммиченный манифест не должен расходиться с кодом и данными."""
+    stored = json.loads(
+        (PROJECT_ROOT / "docs" / "lab6" / "features_manifest.json").read_text(encoding="utf-8")
+    )
+    _, manifest = features.build(default_splits)
+
+    assert manifest["vocabulary_size"] == stored["vocabulary_size"]
+    assert manifest["vocabulary_sha256"] == stored["vocabulary_sha256"]
+    assert manifest["rows"] == stored["rows"]
+    params = {
+        key: list(value) if isinstance(value, tuple) else value
+        for key, value in manifest["params"].items()
+    }
+    assert params == stored["params"]

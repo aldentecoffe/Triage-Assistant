@@ -30,6 +30,8 @@ FILL_COLUMNS = ("severity", "service", "root_cause", "confidence", "comment")
 
 def sample_cards(frame: pd.DataFrame, count: int, seed: int) -> pd.DataFrame:
     """Стратифицированная выборка: карточки по кругу, равномерно по сценариям."""
+    if count < 1:
+        raise ValueError(f"нужно хотя бы одну карточку, запрошено {count}")
     if frame.empty:
         raise ValueError("не из чего выбирать: пустая выборка")
     if count > len(frame):
@@ -87,6 +89,9 @@ def main() -> int:
     args = parser.parse_args()
 
     paths = {name: Path(args.outdir) / name for name in ("pass_a.csv", "pass_b.csv", "key.csv")}
+    if args.count < 1 or args.repeat < 1:
+        print("Ошибка: --count и --repeat должны быть больше нуля")
+        return 1
     if not args.force and any(path.exists() for path in paths.values()):
         print(f"Листы уже есть в {args.outdir}: перезапись только с --force")
         return 1

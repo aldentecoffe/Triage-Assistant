@@ -73,6 +73,7 @@
 
 - `docs/lab6/annotation_guideline.md` — инструкция 1.0.
 - `data/annotation/pass_a.csv`, `pass_b.csv`, `key.csv` — листы и ключ.
-- `docs/lab6/annotation_results.md` — результаты, журнал, выводы.
+- `docs/lab6/annotation_results.md` — результаты, журнал, выводы. Появится после двух
+  проходов разметки; до этого файла нет и ссылаться на него как на готовый нельзя.
 - `docs/lab6/data_card_update.md` — Data Card 1.2.
 - `src/annotation_sheet.py`, `src/agreement.py` — генерация листов и расчёт согласия.

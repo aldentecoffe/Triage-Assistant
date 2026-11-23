@@ -16,11 +16,15 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from split_dataset import find_violations
+
+if TYPE_CHECKING:  # pragma: no cover - только для аннотаций
+    from scipy.sparse import csr_matrix
 
 FEATURE_VERSION = "1.0"
 TEXT_COLUMN = "description"
@@ -65,7 +69,7 @@ def fit_vectorizer(train: pd.DataFrame) -> TfidfVectorizer:
     return vectorizer
 
 
-def transform(vectorizer: TfidfVectorizer, frame: pd.DataFrame):
+def transform(vectorizer: TfidfVectorizer, frame: pd.DataFrame) -> "csr_matrix":
     """Применяет неизменные веса: новые слова в других выборках игнорируются."""
     return vectorizer.transform(frame[TEXT_COLUMN].astype(str))
 

@@ -448,10 +448,13 @@ def checks_coverage(frame: pd.DataFrame) -> list[dict[str, str]]:
 
 
 def impact_severity_map() -> dict[str, list[tuple[str, str]]]:
-    """Последствие сценария и его класс: по этому правилу выставляется severity."""
+    """Последствие сценария и его класс по таблице IMPACT_SEVERITY."""
     mapping: dict[str, list[tuple[str, str]]] = {}
     for scenario in SCENARIOS:
-        marks = IMPACT_SEVERITY[scenario["id"]]
+        marks = IMPACT_SEVERITY.get(scenario["id"])
+        if not marks:
+            mapping[scenario["id"]] = []
+            continue
         rows = list(zip(scenario["impacts_ru"], marks["ru"]))
         rows.append((scenario["impact_en"], marks["en"]))
         mapping[scenario["id"]] = rows
@@ -459,7 +462,12 @@ def impact_severity_map() -> dict[str, list[tuple[str, str]]]:
 
 
 def severity_mismatches(frame: pd.DataFrame) -> pd.Series:
-    """Карточки, где severity не совпадает с классом последствия из текста."""
+    """Карточки, где метка в файле не совпадает с классом последствия из текста.
+
+    Проверка сверяет файл с таблицей `IMPACT_SEVERITY`, а не доказывает, что
+    таблица выведена из текста по инструкции: это отдельный вопрос, на который
+    отвечает пилот разметки.
+    """
     mapping = impact_severity_map()
     text = frame["description"].astype("string").str.lower().fillna("")
 
@@ -501,8 +509,8 @@ def checks_events(frame: pd.DataFrame) -> list[dict[str, str]]:
             f"{mixed_events}, сервисов больше двух: {multi_service}, "
             f"разброс времени больше {EVENT_TIME_LIMIT} мин: {long_events}, "
             f"нечитаемых дат: {unparsed}",
-            "критичность карточки выводится из её последствия; карточки события не независимы, "
-            "оценка и бутстрэп считаются по событиям и сценариям",
+            "метка в файле совпадает с классом последствия по таблице IMPACT_SEVERITY; "
+            "карточки события не независимы, оценка и бутстрэп считаются по событиям и сценариям",
             "ok" if problems == 0 else "fail",
         ),
     ]

@@ -1,10 +1,10 @@
-"""Согласие разметчиков: разбор меток, каппа Коэна, сверка с набором.
+"""Согласие разметчиков: две таблицы, каппа и журнал расхождений.
 
-Расчёт опирается на три стороны: метки прохода A, прохода B и набора.
-`merge_passes` проставляет `incident_id` обоим листам через ключ, `attach_gold`
-добавляет к строкам метки набора, а `agreement` сравнивает любые две стороны.
-«Спорный» и пустые ячейки в каппу не входят, а недопустимые значения
-останавливают обработку с номером карточки.
+Первая таблица сравнивает проходы между собой только на повторно размеченных
+карточках. Вторая сверяет каждый проход с метками набора: первый проход берётся
+целиком, поэтому `combine` шире `merge_passes`. Тесты держат это различие,
+квадратичную каппу в выводе и правила журнала: пустая ячейка сама по себе
+расхождением не считается, «спорный» и противоречие набору — считаются.
 """
 
 from __future__ import annotations
@@ -12,11 +12,13 @@ from __future__ import annotations
 import math
 import sys
 import warnings
+from pathlib import Path
 
 import pandas as pd
 import pytest
 
 import agreement
+from incident_taxonomy import ROOT_CAUSES, SERVICES, SEVERITIES
 
 
 def _sheet(
@@ -53,22 +55,125 @@ def _key(mapping: dict[str, str], pass_name: str) -> pd.DataFrame:
     )
 
 
-def _pairs_from_sheets(first: pd.DataFrame, second: pd.DataFrame) -> pd.DataFrame:
-    """Собирает пару проходов так же, как боевой код: collect → ключ → merge_passes.
+def _combined_case(first_value: str, second_value: str, gold_value: str) -> pd.DataFrame:
+    """Одна карточка и её повтор: значения метки критичности задаются явно."""
+    first = _sheet(["A001"], [first_value], ["billing"], ["change"])
+    second = _sheet(["B001"], [second_value], ["billing"], ["change"])
+    key = pd.concat(
+        [_key({"A001": "I1"}, "a"), _key({"B001": "I1"}, "b")], ignore_index=True
+    )
+    gold = pd.DataFrame(
+        {
+            "incident_id": ["I1"],
+            "severity": [gold_value],
+            "service": ["billing"],
+            "root_cause": ["change"],
+        }
+    )
+    return agreement.combine(
+        agreement.collect(first), agreement.collect(second), key, gold
+    )
 
-    Карточки нумеруются подряд, поэтому первая карточка листа получает I1 и так
-    далее; так в результате появляются и метки, и состояния обеих сторон.
+
+def _row_after(text: str, heading: str, name: str) -> list[str]:
+    """Строка таблицы из нужного раздела отчёта, разобранная по ячейкам."""
+    block = text.split(heading, 1)[1]
+    for line in block.splitlines():
+        if line.startswith(f"| {name} |"):
+            return [cell.strip() for cell in line.strip("|").split("|")]
+    raise AssertionError(f"в разделе {heading!r} нет строки {name!r}")
+
+
+def _cli_error(capsys: pytest.CaptureFixture[str]) -> str:
+    """Проверяет, что CLI напечатал «Ошибка:» и не оставил трассировку."""
+    captured = capsys.readouterr()
+    text = captured.out + captured.err
+    assert "Ошибка:" in text
+    assert "Traceback" not in text
+    return text
+
+
+# --- фикстуры ---------------------------------------------------------------
+
+
+@pytest.fixture
+def pilot_frames() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Пилот в миниатюре: первый проход шире второго, карточку I3 не повторяли.
+
+    Проход A размечен целиком: P1, P2, P2. Проход B повторяет I1 и I2, причём
+    по сервису в I1 он расходится с A. Набор по критичности расходится с A
+    в карточке I3, которой во втором проходе нет.
     """
+    first = _sheet(
+        ["A001", "A002", "A003"],
+        ["P1", "P2", "P2"],
+        ["billing", "billing", "ims"],
+        ["change", "change", "capacity"],
+    )
+    second = _sheet(
+        ["B001", "B002"],
+        ["P1", "P2"],
+        ["ims", "billing"],
+        ["change", "change"],
+    )
     key = pd.concat(
         [
-            _key({card: f"I{number}" for number, card in enumerate(first["card"], start=1)}, "a"),
-            _key({card: f"I{number}" for number, card in enumerate(second["card"], start=1)}, "b"),
+            _key({"A001": "I1", "A002": "I2", "A003": "I3"}, "a"),
+            _key({"B001": "I1", "B002": "I2"}, "b"),
         ],
         ignore_index=True,
     )
+    gold = pd.DataFrame(
+        {
+            "incident_id": ["I1", "I2", "I3"],
+            "severity": ["P1", "P2", "P1"],
+            "service": ["billing", "billing", "ims"],
+            "root_cause": ["change", "change", "capacity"],
+        }
+    )
+    return first, second, key, gold
+
+
+@pytest.fixture
+def merged(pilot_frames) -> pd.DataFrame:
+    """Только карточки, размеченные дважды: I1 и I2."""
+    first, second, key, _ = pilot_frames
     return agreement.merge_passes(
         agreement.collect(first), agreement.collect(second), key
     )
+
+
+@pytest.fixture
+def combined(pilot_frames) -> pd.DataFrame:
+    """Весь первый проход: I1, I2 и I3 с пустым вторым проходом."""
+    first, second, key, gold = pilot_frames
+    return agreement.combine(
+        agreement.collect(first), agreement.collect(second), key, gold
+    )
+
+
+@pytest.fixture
+def annotation_files(
+    tmp_path: Path, pilot_frames
+) -> tuple[Path, Path]:
+    """Листы, ключ и метки набора в том виде, в каком их читает main()."""
+    first, second, key, gold = pilot_frames
+    labels = tmp_path / "annotation"
+    labels.mkdir()
+    for name, frame in (("pass_a.csv", first), ("pass_b.csv", second), ("key.csv", key)):
+        frame.to_csv(labels / name, index=False, encoding="utf-8")
+    gold_path = tmp_path / "validation.csv"
+    gold.to_csv(gold_path, index=False, encoding="utf-8")
+    return labels, gold_path
+
+
+def _run_cli(monkeypatch: pytest.MonkeyPatch, labels: Path, gold: Path) -> int:
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["agreement.py", "--labels", str(labels), "--data", str(gold)],
+    )
+    return agreement.main()
 
 
 @pytest.fixture
@@ -77,37 +182,6 @@ def demo_pairs() -> pd.DataFrame:
     first = ["P1"] * 6 + ["P2"] * 6
     second = ["P1"] * 5 + ["P2"] + ["P1"] + ["P2"] * 5
     return _pairs(first, second)
-
-
-@pytest.fixture
-def merged_pairs() -> pd.DataFrame:
-    """Три карточки после сопоставления проходов: у второй во втором проходе пропуск."""
-    first = _sheet(
-        ["A001", "A002", "A003"],
-        ["P1", "P2", "P2"],
-        ["billing", "billing", "ims"],
-        ["change", "change", "capacity"],
-    )
-    second = _sheet(
-        ["B001", "B002", "B003"],
-        ["P1", "", "P3"],
-        ["billing", "billing", "ims"],
-        ["change", "change", "capacity"],
-    )
-    return _pairs_from_sheets(first, second)
-
-
-@pytest.fixture
-def gold() -> pd.DataFrame:
-    """Метки набора: проход A совпадает с набором в 2 случаях из 3, проход B — в 1 из 2."""
-    return pd.DataFrame(
-        {
-            "incident_id": ["I1", "I2", "I3"],
-            "severity": ["P1", "P1", "P2"],
-            "service": ["billing", "billing", "ims"],
-            "root_cause": ["change", "change", "capacity"],
-        }
-    )
 
 
 # --- разбор одной ячейки ----------------------------------------------------
@@ -262,63 +336,63 @@ def test_weighted_kappa_is_kept_for_severity_only() -> None:
     assert math.isnan(stats["weighted"])
 
 
+def test_agreement_compares_first_and_second_passes(merged: pd.DataFrame) -> None:
+    """По умолчанию сравниваются проходы A и B на повторно размеченных карточках."""
+    stats = agreement.agreement(merged, "severity")
+
+    assert stats["n"] == 2
+    assert stats["agreement"] == 1.0
+
+
+def test_agreement_compares_each_pass_with_the_dataset(combined: pd.DataFrame) -> None:
+    """У прохода A в сверке три карточки, у прохода B — только повторённые две."""
+    by_first = agreement.agreement(combined, "severity", left="a", right="gold")
+    by_second = agreement.agreement(combined, "severity", left="b", right="gold")
+
+    assert (by_first["n"], by_second["n"]) == (3, 2)
+    assert by_first["agreement"] == pytest.approx(2 / 3)
+    assert by_second["agreement"] == 1.0
+
+
+def test_agreement_rejects_unknown_side(combined: pd.DataFrame) -> None:
+    with pytest.raises(KeyError, match="severity_label_c"):
+        agreement.agreement(combined, "severity", left="a", right="c")
+
+
 def test_format_share_uses_russian_decimal_comma() -> None:
     assert agreement.format_share(0.8333) == "0,833"
     assert agreement.format_share(float("nan")) == "—"
 
 
-def test_agreement_compares_first_and_second_passes(merged_pairs: pd.DataFrame) -> None:
-    """По умолчанию сравниваются проходы A и B; пропуск во втором проходе не считается."""
-    stats = agreement.agreement(merged_pairs, "severity")
-
-    assert stats["n"] == 2
-    assert stats["agreement"] == pytest.approx(1 / 2)
+def test_format_value_replaces_empty_labels_with_a_dash() -> None:
+    assert agreement.format_value(float("nan")) == "—"
+    assert agreement.format_value(None) == "—"
+    assert agreement.format_value("P1") == "P1"
 
 
-def test_agreement_compares_each_pass_with_the_dataset(
-    merged_pairs: pd.DataFrame, gold: pd.DataFrame
-) -> None:
-    """Стороны a, b и gold: каждый проход сверяется с метками набора отдельно."""
-    attached = agreement.attach_gold(merged_pairs, gold)
-
-    by_first = agreement.agreement(attached, "severity", left="a", right="gold")
-    by_second = agreement.agreement(attached, "severity", left="b", right="gold")
-
-    assert (by_first["n"], by_second["n"]) == (3, 2)
-    assert by_first["agreement"] == pytest.approx(2 / 3)
-    assert by_second["agreement"] == pytest.approx(1 / 2)
+# --- подготовка стороны и сопоставление -------------------------------------
 
 
-def test_agreement_rejects_unknown_side(merged_pairs: pd.DataFrame) -> None:
-    with pytest.raises(KeyError, match="severity_label_gold"):
-        agreement.agreement(merged_pairs, "severity", left="a", right="gold")
+def test_prepare_side_maps_cards_and_renames_columns(pilot_frames) -> None:
+    first, _, key, _ = pilot_frames
+
+    prepared = agreement.prepare_side(agreement.collect(first), key, "a")
+
+    assert prepared.set_index("card").loc["A002", "incident_id"] == "I2"
+    assert {"severity_label_a", "severity_state_a"} <= set(prepared.columns)
+    assert "severity_label" not in prepared.columns
 
 
-# --- сопоставление проходов -------------------------------------------------
-
-
-def test_merge_passes_assigns_incident_id_to_both_sheets(merged_pairs: pd.DataFrame) -> None:
-    """Оба листа приходят без incident_id: номер и состояния проставляются по ключу обеих сторон."""
-    assert len(merged_pairs) == 3
-    assert set(merged_pairs["incident_id"]) == {"I1", "I2", "I3"}
+def test_merge_passes_keeps_only_repeated_cards(merged: pd.DataFrame) -> None:
+    """Внутреннее соединение оставляет карточки, размеченные дважды."""
+    assert len(merged) == 2
+    assert set(merged["incident_id"]) == {"I1", "I2"}
     assert {
         "severity_label_a",
         "severity_label_b",
         "severity_state_a",
         "severity_state_b",
-    } <= set(merged_pairs.columns)
-    rows = merged_pairs.set_index("incident_id")
-    assert (rows.loc["I1", "severity_label_a"], rows.loc["I1", "severity_label_b"]) == (
-        "P1",
-        "P1",
-    )
-    assert pd.isna(rows.loc["I2", "severity_label_b"])
-    assert rows.loc["I2", "severity_state_b"] == "empty"
-    assert rows.loc["I1", "severity_state_b"] == "ok"
-    assert (rows.loc["I3", "severity_label_a"], rows.loc["I3", "severity_label_b"]) == (
-        "P2",
-        "P3",
-    )
+    } <= set(merged.columns)
 
 
 def test_merge_passes_marks_second_pass_cards_in_the_error() -> None:
@@ -343,24 +417,26 @@ def test_merge_passes_reports_first_pass_cards_missing_in_the_key() -> None:
         agreement.merge_passes(first, second, key)
 
 
-# --- метки набора -----------------------------------------------------------
+# --- метки набора и полный проход -------------------------------------------
 
 
-def test_attach_gold_adds_dataset_labels(merged_pairs: pd.DataFrame, gold: pd.DataFrame) -> None:
+def test_attach_gold_adds_dataset_labels(merged: pd.DataFrame, pilot_frames) -> None:
     """Метки набора приходят отдельными колонками, число строк не меняется."""
-    attached = agreement.attach_gold(merged_pairs, gold)
+    _, _, _, gold = pilot_frames
 
-    assert len(attached) == len(merged_pairs)
+    attached = agreement.attach_gold(merged, gold)
+
+    assert len(attached) == len(merged)
     for column in agreement.ALLOWED:
         assert f"{column}_label_gold" in attached.columns
     labels = attached.set_index("incident_id")["severity_label_gold"]
     assert labels.loc["I1"] == "P1"
-    assert labels.loc["I2"] == "P1"
-    assert labels.loc["I3"] == "P2"
+    assert labels.loc["I2"] == "P2"
 
 
-def test_attach_gold_leaves_unknown_incident_without_label(gold: pd.DataFrame) -> None:
-    """Карточки, которой нет в наборе, достаётся NaN, а не выдуманная метка."""
+def test_attach_gold_leaves_unknown_incident_without_label(pilot_frames) -> None:
+    """Карточке, которой нет в наборе, достаётся NaN, а не выдуманная метка."""
+    _, _, _, gold = pilot_frames
     pairs = pd.DataFrame(
         {
             "card": ["A001"],
@@ -380,186 +456,223 @@ def test_attach_gold_leaves_unknown_incident_without_label(gold: pd.DataFrame) -
     assert pd.isna(attached.loc[0, "severity_label_gold"])
 
 
-def test_report_compares_each_pass_with_the_dataset(
-    merged_pairs: pd.DataFrame, gold: pd.DataFrame
+def test_combine_keeps_the_whole_first_pass(
+    combined: pd.DataFrame, merged: pd.DataFrame
 ) -> None:
-    """Вторая таблица отчёта — совпадение каждого прохода с метками набора.
+    """Сверка с набором идёт по всем карточкам первого прохода, а не по повторённым."""
+    assert len(combined) == 3
+    assert len(merged) == 2
+    assert set(combined["incident_id"]) == {"I1", "I2", "I3"}
+    assert {
+        "severity_label_gold",
+        "service_label_gold",
+        "root_cause_label_gold",
+    } <= set(combined.columns)
 
-    Проход A совпадает с набором в 2 случаях из 3 (0,667), проход B — в 1 из 2
-    (0,500). Если отчёт сравнивает проходы между собой, в обеих ячейках
-    окажется 0,500.
-    """
-    text = agreement.report(merged_pairs, gold)
 
-    assert "| Критичность | 0,667 | 0,500 |" in text
+def test_combine_marks_second_pass_empty_where_not_repeated(
+    combined: pd.DataFrame,
+) -> None:
+    rows = combined.set_index("incident_id")
+
+    assert pd.isna(rows.loc["I3", "severity_label_b"])
+    assert rows.loc["I3", "severity_state_b"] == "empty"
+    assert rows.loc["I1", "severity_state_b"] == "ok"
+    assert combined["severity_state_b"].notna().all()
+
+
+def test_combine_covers_the_full_pilot() -> None:
+    """Боевой масштаб: 120 карточек первого прохода и 30 повторных."""
+    count, repeat = 120, 30
+    severities = [SEVERITIES[index % len(SEVERITIES)] for index in range(count)]
+    services = [list(SERVICES)[index % len(SERVICES)] for index in range(count)]
+    causes = [list(ROOT_CAUSES)[index % len(ROOT_CAUSES)] for index in range(count)]
+    first = _sheet(
+        [f"A{number:03d}" for number in range(1, count + 1)],
+        severities,
+        services,
+        causes,
+    )
+    second = _sheet(
+        [f"B{number:03d}" for number in range(1, repeat + 1)],
+        severities[:repeat],
+        services[:repeat],
+        causes[:repeat],
+    )
+    key = pd.concat(
+        [
+            _key({f"A{number:03d}": f"I{number}" for number in range(1, count + 1)}, "a"),
+            _key({f"B{number:03d}": f"I{number}" for number in range(1, repeat + 1)}, "b"),
+        ],
+        ignore_index=True,
+    )
+    gold = pd.DataFrame(
+        {
+            "incident_id": [f"I{number}" for number in range(1, count + 1)],
+            "severity": severities,
+            "service": services,
+            "root_cause": causes,
+        }
+    )
+
+    prepared_first = agreement.collect(first)
+    prepared_second = agreement.collect(second)
+    combined = agreement.combine(prepared_first, prepared_second, key, gold)
+
+    assert len(combined) == count
+    assert len(agreement.merge_passes(prepared_first, prepared_second, key)) == repeat
+    assert int(combined["severity_state_b"].eq("empty").sum()) == count - repeat
+    assert int(combined["severity_label_b"].notna().sum()) == repeat
+    by_first = agreement.agreement(combined, "severity", "a", "gold")
+    by_second = agreement.agreement(combined, "severity", "b", "gold")
+    assert (by_first["n"], by_second["n"]) == (count, repeat)
+
+
+# --- отчёт ------------------------------------------------------------------
+
+
+def test_report_compares_each_pass_with_the_dataset(combined: pd.DataFrame) -> None:
+    """Вторая таблица: у прохода A три сравнения, у прохода B — два."""
+    text = agreement.report(combined)
+
+    row = _row_after(text, "### Сверка с метками набора", "Критичность")
+
+    assert row == ["Критичность", "3", "0,667", "2", "1,000"]
+
+
+def test_report_prints_quadratic_kappa_for_severity_only(
+    combined: pd.DataFrame,
+) -> None:
+    """Квадратичная каппа заполнена только для критичности, у сервиса и причины — «—»."""
+    text = agreement.report(combined)
+
+    severity = _row_after(text, "### Согласие первого и второго прохода", "Критичность")
+    service = _row_after(text, "### Согласие первого и второго прохода", "Сервис")
+    cause = _row_after(text, "### Согласие первого и второго прохода", "Категория причины")
+
+    assert severity[5] == "1,000"
+    assert service[5] == "—"
+    assert cause[5] == "—"
 
 
 # --- журнал расхождений -----------------------------------------------------
 
 
-@pytest.fixture
-def pairs_with_gold() -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Четыре карточки: полное совпадение, расхождение с набором и расхождение проходов."""
-    first = _sheet(
-        ["A001", "A002", "A003", "A004"],
-        ["P1", "P2", "P2", "P3"],
-        ["billing", "billing", "ims", "ims"],
-        ["change", "capacity", "software", "network"],
-    )
-    second = _sheet(
-        ["B001", "B002", "B003", "B004"],
-        ["P1", "P2", "P3", "P3"],
-        ["billing", "billing", "ims", "transport"],
-        ["change", "capacity", "software", "hardware"],
-    )
-    gold = pd.DataFrame(
-        {
-            "incident_id": ["I1", "I2", "I3", "I4"],
-            "severity": ["P1", "P3", "P2", "P3"],
-            "service": ["billing", "billing", "ims", "ims"],
-            "root_cause": ["change", "capacity", "software", "network"],
-        }
-    )
-    return _pairs_from_sheets(first, second), gold
-
-
-def test_discrepancies_logs_only_divergent_rows(
-    pairs_with_gold: tuple[pd.DataFrame, pd.DataFrame],
-) -> None:
-    pairs, gold = pairs_with_gold
-
-    log = agreement.discrepancies(pairs, gold)
+def test_discrepancies_logs_divergence_and_dataset_conflicts(combined: pd.DataFrame) -> None:
+    """В журнал попадают расхождение проходов и карточка, которой не было в повторе."""
+    log = agreement.discrepancies(combined)
 
     found = set(zip(log["incident_id"], log["label"]))
-    assert found == {
-        ("I2", "Критичность"),
-        ("I3", "Критичность"),
-        ("I4", "Сервис"),
-        ("I4", "Категория причины"),
-    }
+    assert found == {("I1", "Сервис"), ("I3", "Критичность")}
 
 
-def test_discrepancies_never_lists_a_full_match(
-    pairs_with_gold: tuple[pd.DataFrame, pd.DataFrame],
-) -> None:
-    pairs, gold = pairs_with_gold
-
-    log = agreement.discrepancies(pairs, gold)
-
-    assert "I1" not in set(log["incident_id"])
-
-
-def test_discrepancies_keeps_both_passes_and_the_dataset(
-    pairs_with_gold: tuple[pd.DataFrame, pd.DataFrame],
-) -> None:
-    pairs, gold = pairs_with_gold
-
-    log = agreement.discrepancies(pairs, gold)
-    row = log.set_index(["incident_id", "label"]).loc[("I3", "Критичность")]
-
-    assert row["card"] == "A003"
-    assert (row["first"], row["second"], row["dataset"]) == ("P2", "P3", "P2")
-
-
-def test_discrepancies_skips_cards_without_an_answer() -> None:
-    """Пустая ячейка означает, что метку не размечали: это не расхождение."""
-    first = _sheet(["A001"], ["P2"], ["billing"], ["change"])
-    second = _sheet(["B001"], [""], ["billing"], ["change"])
-    gold = pd.DataFrame(
-        {
-            "incident_id": ["I1"],
-            "severity": ["P1"],
-            "service": ["billing"],
-            "root_cause": ["change"],
-        }
-    )
-
-    log = agreement.discrepancies(_pairs_from_sheets(first, second), gold)
+def test_discrepancies_skips_an_empty_answer() -> None:
+    """Пустая ячейка второго прохода сама по себе расхождения не создаёт."""
+    log = agreement.discrepancies(_combined_case("P2", "", "P2"))
 
     assert log.empty
 
 
-def test_discrepancies_skips_cards_empty_in_both_passes() -> None:
-    """Если метку не размечали ни в одном проходе, журналу нечего сравнивать."""
-    first = _sheet(["A001"], [""], ["billing"], ["change"])
-    second = _sheet(["B001"], [""], ["billing"], ["change"])
+def test_discrepancies_skips_unrepeated_cards_that_match_the_dataset() -> None:
+    """Карточка без повтора не попадает в журнал, если первый проход совпал с набором."""
+    first = agreement.collect(
+        _sheet(["A001", "A002"], ["P1", "P2"], ["billing"] * 2, ["change"] * 2)
+    )
+    second = agreement.collect(_sheet(["B001"], ["P1"], ["billing"], ["change"]))
+    key = pd.concat(
+        [
+            _key({"A001": "I1", "A002": "I2"}, "a"),
+            _key({"B001": "I1"}, "b"),
+        ],
+        ignore_index=True,
+    )
     gold = pd.DataFrame(
         {
-            "incident_id": ["I1"],
-            "severity": ["P1"],
-            "service": ["billing"],
-            "root_cause": ["change"],
+            "incident_id": ["I1", "I2"],
+            "severity": ["P1", "P2"],
+            "service": ["billing", "billing"],
+            "root_cause": ["change", "change"],
         }
     )
 
-    log = agreement.discrepancies(_pairs_from_sheets(first, second), gold)
+    combined = agreement.combine(first, second, key, gold)
+
+    assert agreement.discrepancies(combined).empty
+
+
+def test_discrepancies_skips_cards_empty_in_both_passes() -> None:
+    """Если метку не размечали ни в одном проходе, журналу нечего сравнивать."""
+    log = agreement.discrepancies(_combined_case("", "", "P1"))
 
     assert log.empty
 
 
 def test_discrepancies_logs_disputed_answers() -> None:
     """«Спорный» — это ответ, поэтому он попадает в журнал с пустой меткой."""
-    first = _sheet(["A001"], ["P2"], ["billing"], ["change"])
-    second = _sheet(["B001"], ["спорный"], ["billing"], ["change"])
-    gold = pd.DataFrame(
-        {
-            "incident_id": ["I1"],
-            "severity": ["P1"],
-            "service": ["billing"],
-            "root_cause": ["change"],
-        }
-    )
-
-    log = agreement.discrepancies(_pairs_from_sheets(first, second), gold)
+    log = agreement.discrepancies(_combined_case("P2", "спорный", "P2"))
 
     assert len(log) == 1
     row = log.iloc[0]
-    assert (row["incident_id"], row["label"]) == ("I1", "Критичность")
-    assert row["first"] == "P2"
+    assert (row["first"], row["dataset"]) == ("P2", "P2")
     assert pd.isna(row["second"])
-    assert row["dataset"] == "P1"
+
+
+def test_discrepancies_logs_passes_that_differ() -> None:
+    log = agreement.discrepancies(_combined_case("P2", "P3", "P2"))
+
+    assert len(log) == 1
+    assert (log.iloc[0]["first"], log.iloc[0]["second"]) == ("P2", "P3")
+
+
+def test_discrepancies_logs_agreement_against_the_dataset() -> None:
+    """Оба прохода совпали между собой, но расходятся с набором."""
+    log = agreement.discrepancies(_combined_case("P2", "P2", "P1"))
+
+    assert len(log) == 1
+    assert (log.iloc[0]["first"], log.iloc[0]["dataset"]) == ("P2", "P1")
+
+
+# --- ключ -------------------------------------------------------------------
+
+
+def test_read_key_returns_the_mapping(tmp_path: Path) -> None:
+    path = tmp_path / "key.csv"
+    _key({"A001": "I1"}, "a").to_csv(path, index=False, encoding="utf-8")
+
+    loaded = agreement.read_key(path)
+
+    assert {"card", "incident_id", "pass_name"} <= set(loaded.columns)
+    assert len(loaded) == 1
+
+
+def test_read_key_rejects_empty_key(tmp_path: Path) -> None:
+    path = tmp_path / "key.csv"
+    pd.DataFrame(columns=["card", "incident_id", "pass_name"]).to_csv(path, index=False)
+
+    with pytest.raises(ValueError, match="пуст"):
+        agreement.read_key(path)
+
+
+def test_read_key_requires_all_columns(tmp_path: Path) -> None:
+    path = tmp_path / "key.csv"
+    _key({"A001": "I1"}, "a").drop(columns=["pass_name"]).to_csv(path, index=False)
+
+    with pytest.raises(ValueError, match="pass_name"):
+        agreement.read_key(path)
+
+
+def test_read_key_rejects_duplicate_card_numbers(tmp_path: Path) -> None:
+    path = tmp_path / "key.csv"
+    duplicated = pd.concat(
+        [_key({"A001": "I1"}, "a"), _key({"A001": "I1"}, "a")], ignore_index=True
+    )
+    duplicated.to_csv(path, index=False)
+
+    with pytest.raises(ValueError, match="повторяются"):
+        agreement.read_key(path)
 
 
 # --- CLI --------------------------------------------------------------------
-
-
-@pytest.fixture
-def annotation_files(tmp_path: Path) -> tuple[Path, Path]:
-    """Листы, ключ и метки набора в том виде, в каком их читает main()."""
-    labels = tmp_path / "annotation"
-    labels.mkdir()
-    first = _sheet(
-        ["A001", "A002", "A003"],
-        ["P1", "P2", "P2"],
-        ["billing", "billing", "ims"],
-        ["change", "change", "capacity"],
-    )
-    second = _sheet(
-        ["B001", "B002", "B003"],
-        ["P1", "", "P3"],
-        ["billing", "billing", "ims"],
-        ["change", "change", "capacity"],
-    )
-    key = pd.concat(
-        [
-            _key({"A001": "I1", "A002": "I2", "A003": "I3"}, "a"),
-            _key({"B001": "I1", "B002": "I2", "B003": "I3"}, "b"),
-        ],
-        ignore_index=True,
-    )
-    gold = pd.DataFrame(
-        {
-            "incident_id": ["I1", "I2", "I3"],
-            "severity": ["P1", "P1", "P2"],
-            "service": ["billing", "billing", "ims"],
-            "root_cause": ["change", "change", "capacity"],
-        }
-    )
-    for name, frame in (("pass_a.csv", first), ("pass_b.csv", second), ("key.csv", key)):
-        frame.to_csv(labels / name, index=False, encoding="utf-8")
-    gold_path = tmp_path / "validation.csv"
-    gold.to_csv(gold_path, index=False, encoding="utf-8")
-    return labels, gold_path
 
 
 def test_cli_writes_the_full_report(
@@ -567,23 +680,17 @@ def test_cli_writes_the_full_report(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """Сквозной путь main(): листы без incident_id читаются, ключ связывает проходы."""
     labels, gold_path = annotation_files
-    monkeypatch.setattr(
-        sys,
-        "argv",
-        ["agreement.py", "--labels", str(labels), "--data", str(gold_path)],
-    )
 
-    assert agreement.main() == 0
+    assert _run_cli(monkeypatch, labels, gold_path) == 0
 
     out = capsys.readouterr().out
-    assert "Согласие первого и второго прохода" in out
-    assert "| Критичность | 0,667 | 0,500 |" in out
-    # I2 во втором проходе не размечен: пустая ячейка в журнал не идёт.
-    assert "Расхождений в журнале: 1" in out
+    assert "| Критичность | 3 | 0,667 | 2 | 1,000 |" in out
+    assert "Расхождений в журнале: 2" in out
+    assert "A001: Сервис" in out
     assert "A003: Критичность" in out
-    assert "A002" not in out
+    assert "nan" not in out
+    assert "B —" in out
 
 
 def test_cli_stops_on_an_invalid_label(
@@ -597,12 +704,55 @@ def test_cli_stops_on_an_invalid_label(
     )
     sheet.loc[0, "severity"] = "P9"
     sheet.to_csv(labels / "pass_a.csv", index=False, encoding="utf-8-sig")
-    monkeypatch.setattr(
-        sys,
-        "argv",
-        ["agreement.py", "--labels", str(labels), "--data", str(gold_path)],
+
+    assert _run_cli(monkeypatch, labels, gold_path) == 1
+
+    assert "A001" in _cli_error(capsys)
+
+
+def test_cli_stops_on_a_broken_key(
+    annotation_files: tuple[Path, Path],
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    labels, gold_path = annotation_files
+    key = pd.read_csv(
+        labels / "key.csv", dtype=str, keep_default_na=False, encoding="utf-8-sig"
+    )
+    key.drop(columns=["pass_name"]).to_csv(labels / "key.csv", index=False)
+
+    assert _run_cli(monkeypatch, labels, gold_path) == 1
+
+    assert "pass_name" in _cli_error(capsys)
+
+
+def test_cli_stops_on_a_duplicate_key(
+    annotation_files: tuple[Path, Path],
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    labels, gold_path = annotation_files
+    key = pd.read_csv(
+        labels / "key.csv", dtype=str, keep_default_na=False, encoding="utf-8-sig"
+    )
+    pd.concat([key, key.iloc[[0]]], ignore_index=True).to_csv(
+        labels / "key.csv", index=False
     )
 
-    assert agreement.main() == 1
+    assert _run_cli(monkeypatch, labels, gold_path) == 1
 
-    assert "A001" in capsys.readouterr().out
+    assert "повторяются" in _cli_error(capsys)
+
+
+def test_cli_stops_when_data_lacks_incident_id(
+    annotation_files: tuple[Path, Path],
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    labels, gold_path = annotation_files
+    gold = pd.read_csv(gold_path, dtype=str, keep_default_na=False, encoding="utf-8-sig")
+    gold.drop(columns=["incident_id"]).to_csv(gold_path, index=False)
+
+    assert _run_cli(monkeypatch, labels, gold_path) == 1
+
+    assert "incident_id" in _cli_error(capsys)
