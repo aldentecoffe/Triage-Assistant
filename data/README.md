@@ -12,51 +12,64 @@
 
 ## Источники
 
-| Источник | Объём | Роль |
-|---|---|---|
-| Синтетический генератор | 6–10 тыс. записей | Основной датасет для обучения и оценки |
-| IT Service Ticket Classification Dataset (Kaggle) | 47,8 тыс. заявок | Внешний корпус: проверка переноса, предобучение представлений ([ссылка](https://www.kaggle.com/datasets/adisongoh/it-service-ticket-classification-dataset)) |
-| Анонимизированная выгрузка (опционально) | по согласованию | Валидация на реальных данных, если есть разрешение |
+| Источник | Объём | Статус | Роль |
+|---|---|---|---|
+| Синтетический генератор, `src/generate_incidents.py@1.0` | 6 008 сырых записей, 6 000 после очистки | working | Основной набор для обучения и оценки |
+| IT Service Ticket Classification Dataset (Kaggle) | 47,8 тыс. заявок | unknown: лицензия не подтверждена, файлы не скачивались | Планировался для проверки переноса и предобучения представлений ([ссылка](https://www.kaggle.com/datasets/adisongoh/it-service-ticket-classification-dataset)) |
+| Анонимизированная выгрузка инцидентов оператора | по согласованию | planned: разрешения нет | Валидация на реальных данных |
+| Golden set ручной разметки | 100–150 пар | planned: разметка в ЛР 6 | Проверка шкалы релевантности и оценка ранжирования |
 
-## Схема датасета (план)
+Полный реестр с владельцами, лицензиями, датами и ограничениями:
+[docs/lab4/sources.md](../docs/lab4/sources.md). Источник со статусом `unknown` в расчёт
+не попадает, даже если у него есть ссылка.
 
-| Поле | Тип | Описание |
-|---|---|---|
-| `incident_id` | string | Уникальный идентификатор инцидента |
-| `created_at` | datetime | Время регистрации |
-| `title` | string | Краткий заголовок |
-| `description` | string | Текстовое описание |
-| `monitoring_source` | categorical | Prometheus / Zabbix / Netcool / manual |
-| `region` | categorical | Регион или филиал |
-| `affected_ci` | string | Затронутая конфигурационная единица (опционально) |
-| `severity` | label | P1–P4 |
-| `service` | label | Сервис или домен |
-| `root_cause` | label | Категория корневой причины |
-| `resolution` | string | Как решили (опционально, для похожих инцидентов) |
-| `is_synthetic` | bool | Признак синтетической записи |
+## Схема датасета
 
-## Таксономия (черновик)
+Версия 1.0 — смена `data/interim/incidents_clean_v1.0.csv`: 6 000 строк, 20 столбцов,
+UTF-8. Единица анализа — карточка одного инцидента. Несколько карточек одного каскада
+связаны через `event_id` и независимыми объектами не считаются.
 
-**Сервисы:** `billing`, `crm_bss`, `oss`, `ims_volte`, `hlr_hss`, `smsc`,
-`packet_core`, `transport`, `kubernetes_platform`, `monitoring`, `data_center`,
-`customer_portal`.
+| Поле | Роль |
+|---|---|
+| `description` | Единственный признак для TF-IDF и поиска похожих |
+| `severity`, `service`, `root_cause` | Три метки: критичность, сервис, категория причины |
+| `scenario_id`, `event_id`, `text_hash` | Группировка и проверка разделения, в признаки не входят |
+| `split`, `rights_status`, `synthetic`, `source` | Служебные: выборка, допуск, маркировка, происхождение |
+| `title` | Отображение, в модель не входит |
+| `incident_id`, `created_at`, `source_system`, `region`, `affected_ci`, `language`, `generator_version`, `dataset_version` | Аудит |
 
-**Корневые причины:** `change_deploy`, `infrastructure_hardware`, `network`,
-`capacity_load`, `third_party`, `configuration`, `software_bug`, `security_ddos`,
-`database_storage`, `human_error`.
+Типы, допустимые значения и разбор персональных данных: [docs/lab4/schema.md](../docs/lab4/schema.md).
+Состав, ограничения и репрезентативность: [docs/lab4/data_card.md](../docs/lab4/data_card.md).
 
-**Критичность:** P1 — массовый простой, влияние на выручку или регуляторику;
-P2 — серьёзная деградация; P3 — ограниченное влияние; P4 — незначительное или
-информационное событие.
+## Таксономия версии 1.0
+
+Сервисы: `transport`, `platform`, `database`, `ims`, `billing`, `bss`, `external`.
+Категории причин: `change`, `capacity`, `hardware`, `software`, `network`, `external_dep`.
+Критичность: P1 — массовый простой, P2 — серьёзная деградация, P3 — ограниченное влияние,
+P4 — незначительное или информационное событие.
+
+Черновик из лабораторной 1 с 12 сервисами и 10 категориями причин не отменён, а отложен
+до версии 2.0: при 6 000 записей редкие категории получают меньше 300 примеров. Причины
+изменения и план расширения перечислены в [docs/lab4/schema.md](../docs/lab4/schema.md).
 
 ## Структура каталогов
 
 ```text
 data/
 ├── README.md
-├── raw/          # исходные выгрузки (не коммитятся)
-├── interim/      # промежуточные данные (не коммитятся)
-└── processed/    # финальные датасеты (не коммитятся)
+├── raw/          # сырые выгрузки (не коммитятся)
+├── interim/      # промежуточные данные и журнал очистки (не коммитятся)
+└── processed/    # train, validation, test (не коммитятся)
 ```
 
-Генератор данных появится в лабораторной 2.
+## Воспроизведение
+
+```bash
+python src/generate_incidents.py --count 6000
+python src/prepare_dataset.py
+python src/split_dataset.py
+python -m pytest tests -q
+```
+
+Генератор детерминирован: seed 20261123, версия набора 1.0. Данные в репозиторий
+не коммитятся.
