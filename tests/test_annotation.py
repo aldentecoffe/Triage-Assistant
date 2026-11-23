@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -134,6 +135,8 @@ def test_cli_writes_three_files(
 
     assert code == 0
     assert sorted(path.name for path in outdir.iterdir()) == [
+        "form_a.html",
+        "form_b.html",
         "key.csv",
         "pass_a.csv",
         "pass_b.csv",
@@ -213,3 +216,33 @@ def test_cli_fails_when_validation_file_is_missing(
 
     assert _run(monkeypatch, *args) == 1
     assert not outdir.exists()
+
+def test_form_embeds_cards_without_labels(source: Path, tmp_path: Path) -> None:
+    """HTML-форма содержит все карточки, но ни одной метки набора."""
+    outdir = tmp_path / "annotation"
+    frame = pd.read_csv(source, dtype=str, keep_default_na=False)
+    sample = sheets.sample_cards(frame, 12, 7)
+    markup = sheets.build_form(sheets.build_sheet(sample, "A", 7)[0], "Проход A", "pass_a.csv", "key")
+
+    payload = markup.split("const CARDS = ", 1)[1].split(";\n", 1)[0]
+    cards = json.loads(payload)
+
+    assert len(cards) == 12
+    assert all(set(card) == {"card", "description"} for card in cards)
+    assert 'link.download = "pass_a.csv"' in markup
+    assert "STORAGE_KEY" in markup
+    assert "$" not in markup
+
+
+def test_cli_writes_forms_next_to_the_sheets(
+    source: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    outdir = tmp_path / "annotation"
+
+    code = _run(monkeypatch, *_cli_args(source, outdir, count=30, repeat=10))
+
+    assert code == 0
+    for name in ("form_a.html", "form_b.html"):
+        text = (outdir / name).read_text(encoding="utf-8")
+        assert "const CARDS = " in text
+        assert "Скачать CSV" in text
