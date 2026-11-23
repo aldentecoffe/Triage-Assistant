@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Проход B · 30 карточек</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; font: 15px/1.5 "Segoe UI", system-ui, sans-serif; background: #f6f6f4; color: #1c1c1a; }
+  header { display: flex; align-items: center; gap: 12px; padding: 12px 20px; background: #1c1c1a; color: #f6f6f4; position: sticky; top: 0; }
+  header .title { font-weight: 600; }
+  header .grow { flex: 1; }
+  main { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 20px; padding: 20px; max-width: 1180px; margin: 0 auto; }
+  .card { background: #fff; border: 1px solid #d9d9d4; border-radius: 10px; padding: 20px; }
+  .meta { font: 13px ui-monospace, monospace; color: #6b6b63; margin-bottom: 8px; }
+  .text { font-size: 17px; margin: 0 0 18px; }
+  .fields { display: grid; gap: 12px; }
+  label { display: grid; gap: 4px; font-size: 13px; color: #4a4a44; }
+  select, input, textarea { font: inherit; padding: 7px 8px; border: 1px solid #c9c9c2; border-radius: 7px; background: #fff; color: inherit; }
+  textarea { min-height: 54px; resize: vertical; }
+  .nav { display: flex; gap: 10px; margin-top: 18px; }
+  button { font: inherit; padding: 9px 16px; border-radius: 8px; border: 1px solid #1c1c1a; background: #1c1c1a; color: #f6f6f4; cursor: pointer; }
+  button.ghost { background: transparent; color: inherit; }
+  button:disabled { opacity: .4; cursor: default; }
+  aside { font-size: 13px; }
+  aside h2 { font-size: 14px; margin: 0 0 6px; }
+  aside section { background: #fff; border: 1px solid #d9d9d4; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+  aside ul { margin: 6px 0 0; padding-left: 18px; }
+  aside li { margin-bottom: 4px; }
+  aside table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  aside th, aside td { border-top: 1px solid #e2e2dc; padding: 5px 4px; text-align: left; vertical-align: top; }
+  aside th { border-top: none; color: #4a4a44; font-weight: 600; }
+  code { font: 12px ui-monospace, monospace; background: #efefeb; padding: 1px 4px; border-radius: 4px; }
+  .empty { border-color: #b4552d; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <span class="title">Проход B · 30 карточек</span>
+  <span id="progress">0 / 30</span>
+  <span class="grow"></span>
+  <button id="export">Скачать CSV</button>
+</header>
+<main>
+  <section class="card" id="card-box">
+    <div class="meta">Карточка <span id="card-id"></span></div>
+    <p class="text" id="card-text"></p>
+    <div class="fields">
+      <label>Критичность
+        <select id="severity">
+          <option value="">— выберите —</option>
+          <option value="P1">P1 — ключевая функция не выполняется, обходного пути нет</option>
+          <option value="P2">P2 — не выполняется для части или отдельная функция/интеграция</option>
+          <option value="P3">P3 — задержка, очередь, обходной путь есть</option>
+          <option value="P4">P4 — абоненты не затронуты</option>
+          <option value="спорный">спорный — правило не даёт ответа</option>
+        </select>
+      </label>
+      <label>Сервис
+        <select id="service">
+          <option value="">— выберите —</option>
+          <option value="transport">transport — BGP, префиксы, FIB, кольцо агрегации</option>
+          <option value="platform">platform — Kubernetes, поды, деплои, пул адресов</option>
+          <option value="database">database — СУБД, реплика, транзакции, схема</option>
+          <option value="ims">ims — IMS, VoLTE, регистрация, HSS, Diameter</option>
+          <option value="billing">billing — начисления, баланс, платежи, сверка</option>
+          <option value="bss">bss — BSS/OSS, CRM, заказы, тарифы, справочник</option>
+          <option value="external">external — поставщик, интеграция, адаптер, статусы</option>
+        </select>
+      </label>
+      <label>Категория причины
+        <select id="root_cause">
+          <option value="">— выберите —</option>
+          <option value="change">change — изменили настройки, правила, справочник, схему, сертификат</option>
+          <option value="capacity">capacity — исчерпан лимит, пул, очередь, процессор</option>
+          <option value="hardware">hardware — отказал узел, нода, карта, диск</option>
+          <option value="software">software — компонент падает, сбрасывает, считает неверно</option>
+          <option value="network">network — маршрутизация, TTL, потери, BGP</option>
+          <option value="external_dep">external_dep — виноват внешний поставщик или его API</option>
+        </select>
+      </label>
+      <label>Уверенность
+        <select id="confidence">
+          <option value="">—</option>
+          <option value="3">3 — правило применимо без оговорок</option>
+          <option value="2">2 — правило применимо, но в тексте не хватает детали</option>
+          <option value="1">1 — правило ответа не даёт, метка по догадке</option>
+        </select>
+      </label>
+      <label>Комментарий
+        <textarea id="comment" placeholder="Обязателен для «спорного» и уверенности 1"></textarea>
+      </label>
+    </div>
+    <div class="nav">
+      <button class="ghost" id="prev">Назад</button>
+      <button id="next">Дальше</button>
+    </div>
+  </section>
+  <aside>
+    <section>
+      <h2>Таблица решений по критичности</h2>
+      <table>
+        <tr><th>Метка</th><th>Когда</th></tr>
+        <tr><td><code>P1</code></td><td>Голос и регистрация в сети, платежи или магистраль не работают, обхода нет. Заказы, процессинг и интеграции сюда не входят.</td></tr>
+        <tr><td><code>P2</code></td><td>Функция не выполняется для части; остановлен заказ или интеграция; клиент видит ошибку, неверный счёт или нулевой баланс; операция не завершается по таймауту.</td></tr>
+        <tr><td><code>P3</code></td><td>Медленно, но завершается; очередь; часть ассортимента; обход есть: резерв, повтор, ручное оформление, 3G вместо VoLTE.</td></tr>
+        <tr><td><code>P4</code></td><td>Клиент не затронут: сверка, отчёты, справочники, мониторинг, самовосстановление. Если клиент видит ошибку — это не P4.</td></tr>
+      </table>
+      <p style="margin:8px 0 0">Одинаковые по смыслу последствия на русском и английском получают одну метку. Правило молчит — ставьте «спорный».</p>
+    </section>
+    <section>
+      <h2>Порядок</h2>
+      <ul>
+        <li>Читайте только описание карточки.</li>
+        <li>Сначала критичность по последствию, не по симптому и не по величине метрики.</li>
+        <li>Потом сервис по названным системам, затем причина по тому, что сломалось.</li>
+        <li>Уверенность 3 — без оговорок, 2 — не хватает детали, 1 — догадка.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Что дальше</h2>
+      <p>Когда все карточки заполнены, нажмите «Скачать CSV» и сохраните файл как <code>pass_b.csv</code> в папку <code>data/annotation</code>, заменив исходный. Прогресс хранится в браузере, можно закрыть вкладку и вернуться.</p>
+    </section>
+  </aside>
+</main>
+<script>
+const CARDS = [{"card": "B001", "description": "Растёт доля отказов IMS REGISTER; cscf_cpu_pct 100 %. Абоненты в зоне обслуживания не могут зарегистрироваться в сети. CI-282048, узел host-kzn085."}, {"card": "B002", "description": "Порт 100GE на агрегационном узле флапает; link_uptime 49 с. Часть площадок переключилась на резервный путь. CI-390675, узел host-msk048."}, {"card": "B003", "description": "Коммутатор теряет FIB-записи под нагрузкой. fib_usage_pct = 100 %, порог 92 %. Новые префиксы не устанавливаются, часть трафика уходит в чёрную дыру. Объект CI-226369."}, {"card": "B004", "description": "Очередь записей о звонках в биллинге растёт; cdr_queue_depth 341 368 шт. Начисления задерживаются, абоненты видят нулевой баланс. CI-307754, узел host-krd058."}, {"card": "B005", "description": "API поставщика отвечает 429. provider_rps = 169 запросов/с, порог 120 запросов/с. Очередь отложенных запросов растёт. Объект CI-383661."}, {"card": "B006", "description": "После миграции схемы выросли ошибки запросов; migration_duration_min 80 мин. Оформление заказов остановлено. CI-277769, узел host-kzn051."}, {"card": "B007", "description": "Обработчик записей не успевает за потоком на host-krd040. cdr_queue_depth держится 397 424 шт при пороге 250 000 шт. Начисления задерживаются, абоненты видят нулевой баланс. Объект CI-312771."}, {"card": "B008", "description": "BGP-сессия с апстримом уходит в Idle на host-khv154. BGP_Peers_Established держится 1 шт при пороге 2 шт. Часть клиентских префиксов анонсируется через резервный аплинк. Объект CI-210492."}, {"card": "B009", "description": "Поставщик ограничил частоту запросов на host-krd195. provider_rps держится 142 запросов/с при пороге 120 запросов/с. Очередь отложенных запросов растёт. Объект CI-371735."}, {"card": "B010", "description": "Нода HSS выпала из кластера; hss_nodes_online 1 шт. Часть абонентов теряет VoLTE при переключении. CI-300090, узел host-kzn092."}, {"card": "B011", "description": "Миграция схемы не завершилась, таблица заблокирована; sql_errors 115 шт/мин. Часть фоновых задач встала в очередь. CI-267226, узел host-spb025."}, {"card": "B012", "description": "Диск в RAID-массиве переходит в predictive failure на host-msk122. raid_degraded_disks держится 2 шт при пороге 1 шт. Реплика отстала, отчёты не строятся. Объект CI-257352."}, {"card": "B013", "description": "Пул потоков API заказов переполнен на host-ekb071. thread_pool_busy_pct держится 100 % при пороге 99 %. Заказы встают в очередь, клиенты видят ошибку. Объект CI-332914."}, {"card": "B014", "description": "Lock waiters in the database keep growing. lock_waiters is 80 sessions against threshold 60 sessions. Order API requests hang for up to 30 s. Item CI-410902."}, {"card": "B015", "description": "The billing module miscalculates the monthly fee. calc_mismatch is 212/h against threshold 120/h. Daily reconciliation does not match. Item CI-320137."}, {"card": "B016", "description": "Очередь записей о звонках в биллинге растёт; cdr_queue_depth 472 447 шт. Сверка за час не закрылась. CI-199931, узел host-khv141."}, {"card": "B017", "description": "Нода HSS выпала из кластера. diameter_timeouts = 158 шт/мин, порог 120 шт/мин. Часть абонентов теряет VoLTE при переключении. Объект CI-305797."}, {"card": "B018", "description": "После ротации сертификата TLS-соединение не устанавливается; tls_handshake_errors 226 шт/мин. Интеграция с внешней системой недоступна. CI-443563, узел host-spb044."}, {"card": "B019", "description": "Очередь блокировок в СУБД не рассасывается; avg_lock_wait_ms 7 200 мс. Часть транзакций отваливается по таймауту. CI-407684, узел host-ekb034."}, {"card": "B020", "description": "Коммутатор теряет FIB-записи под нагрузкой. fib_usage_pct = 100 %, порог 92 %. Новые префиксы не устанавливаются, часть трафика уходит в чёрную дыру. Объект CI-217352."}, {"card": "B021", "description": "Order API cannot handle the load, the thread pool is full. thread_pool_busy_pct is 100 % against threshold 99 %. Orders queue up and clients see an error. Item CI-344331."}, {"card": "B022", "description": "После ротации сертификата TLS-соединение не устанавливается; cert_days_left -8 дней. Часть заявок не уходит поставщику. CI-438256, узел host-msk189."}, {"card": "B023", "description": "После релиза правил тарификации пошли двойные списания на host-msk075. double_charge_events держится 387 шт/час при пороге 300 шт/час. В поддержку пошли обращения по списаниям. Объект CI-427516."}, {"card": "B024", "description": "Расчётный модуль считает абонентскую плату с ошибкой. rounding_errors = 48 шт/час, порог 40 шт/час. Часть счетов придётся пересчитать. Объект CI-325234."}, {"card": "B025", "description": "Новые правила тарификации считают пакеты неверно; rating_errors 153 шт/мин. Абоненты получают некорректные счета. CI-421569, узел host-khv121."}, {"card": "B026", "description": "Лимиты памяти занижены, контейнеры падают на host-spb036. memory_usage_pct держится 100 % при пороге 92 %. Сервис заказов частично недоступен. Объект CI-245250."}, {"card": "B027", "description": "Pods are killed with OOMKilled after the configuration release. memory_usage_pct is 100 % against threshold 92 %. The order service is partly unavailable. Item CI-246002."}, {"card": "B028", "description": "Поставщик ограничил частоту запросов; provider_429_pct 41 %. Очередь отложенных запросов растёт. CI-384597, узел host-msk131."}, {"card": "B029", "description": "Растёт доля отказов IMS REGISTER. register_fail_pct = 10 %, порог 8 %. Абоненты в зоне обслуживания не могут зарегистрироваться в сети. Объект CI-285583."}, {"card": "B030", "description": "После миграции схемы выросли ошибки запросов на host-kzn065. sql_errors держится 135 шт/мин при пороге 90 шт/мин. Часть фоновых задач встала в очередь. Объект CI-277584."}];
+const STORAGE_KEY = "annotation-pass-b";
+const FINGERPRINT = "a30ed71fd5a62b31";
+const FIELDS = ["severity", "service", "root_cause", "confidence", "comment"];
+
+function emptyAnswers() {
+  return CARDS.map(function (card) {
+    return { card: card.card, description: card.description, severity: "", service: "", root_cause: "", confidence: "", comment: "" };
+  });
+}
+
+function loadAnswers() {
+  try {
+    if (localStorage.getItem(STORAGE_KEY + ":fp") !== FINGERPRINT) return emptyAnswers();
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return emptyAnswers();
+    const saved = JSON.parse(raw);
+    if (!Array.isArray(saved) || saved.length !== CARDS.length) return emptyAnswers();
+    return saved;
+  } catch (error) {
+    return emptyAnswers();
+  }
+}
+
+let answers = loadAnswers();
+let index = 0;
+
+function save() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+    localStorage.setItem(STORAGE_KEY + ":fp", FINGERPRINT);
+  } catch (error) {}
+}
+
+function filled(answer) {
+  return ["severity", "service", "root_cause"].every(function (field) { return answer[field]; });
+}
+
+function render() {
+  const answer = answers[index];
+  document.getElementById("card-id").textContent = answer.card;
+  document.getElementById("card-text").textContent = answer.description;
+  FIELDS.forEach(function (field) {
+    document.getElementById(field).value = answer[field] || "";
+  });
+  const done = answers.filter(filled).length;
+  document.getElementById("progress").textContent = done + " / " + answers.length;
+  document.getElementById("prev").disabled = index === 0;
+  document.getElementById("next").disabled = index === answers.length - 1;
+  document.getElementById("card-box").classList.toggle("empty", !filled(answer));
+}
+
+FIELDS.forEach(function (field) {
+  document.getElementById(field).addEventListener("input", function (event) {
+    answers[index][field] = event.target.value;
+    save();
+    render();
+  });
+});
+
+function move(step) {
+  index = Math.min(Math.max(index + step, 0), answers.length - 1);
+  render();
+}
+
+document.getElementById("prev").addEventListener("click", function () { move(-1); });
+document.getElementById("next").addEventListener("click", function () { move(1); });
+
+document.addEventListener("keydown", function (event) {
+  const tag = document.activeElement.tagName;
+  if (tag === "TEXTAREA" || tag === "INPUT") return;
+  if (event.key === "ArrowRight") { move(1); }
+  if (event.key === "ArrowLeft") { move(-1); }
+  if (["1", "2", "3", "4"].includes(event.key)) {
+    answers[index].severity = "P" + event.key;
+    save();
+    render();
+  }
+});
+
+function csvCell(value) {
+  const text = (value === undefined || value === null) ? "" : String(value);
+  return /[",\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text;
+}
+
+document.getElementById("export").addEventListener("click", function () {
+  const left = answers.filter(function (answer) { return !filled(answer); }).length;
+  if (left > 0 && !confirm("Не заполнено карточек: " + left + ". Скачать как есть?")) return;
+  const header = ["card", "description", "severity", "service", "root_cause", "confidence", "comment"];
+  const lines = [header.join(",")];
+  answers.forEach(function (answer) {
+    lines.push(header.map(function (field) { return csvCell(answer[field]); }).join(","));
+  });
+  const blob = new Blob(["\ufeff" + lines.join("\r\n") + "\r\n"], { type: "text/csv;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "pass_b.csv";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+});
+
+render();
+</script>
+</body>
+</html>
