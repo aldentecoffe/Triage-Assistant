@@ -29,6 +29,11 @@ Wine Quality. Лабораторная 4 — данные проекта: рее
   проверка proxy-признаков и утечек, обновление Data Card. Логика — в
   [src/eda_incidents.py](src/eda_incidents.py), таблица проверок — в
   [docs/lab5/quality_review.md](docs/lab5/quality_review.md).
+- Лабораторная 6, разметка и подготовка данных:
+  [notebooks/lab6_annotation.ipynb](notebooks/lab6_annotation.ipynb). Пять пунктов задания
+  в одном месте: инструкция разметчика, версия набора 1.1, статистика пилота, проверка
+  согласия с журналом расхождений и подготовка признаков без утечки из test. Логика —
+  в `src/agreement.py` и `src/prepare_features.py`.
 
 ## Проблема
 
