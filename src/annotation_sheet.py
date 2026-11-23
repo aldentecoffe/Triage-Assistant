@@ -1,6 +1,6 @@
 """Слепые листы пилотной разметки для ЛР 6.
 
-Собирает выборку карточек из validation, перемешивает и раскладывает в листы,
+Собирает выборку карточек из train и validation, перемешивает и раскладывает в листы,
 где разметчику видны только номер карточки и описание. Метки, сервис, причина,
 `scenario_id` и `event_id` в лист не попадают: иначе проверялась бы не
 инструкция, а память о сгенерированных метках.
@@ -19,13 +19,19 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 from string import Template
 
 import pandas as pd
 
+TRAIN_PATH = "data/processed/incidents_train_v1.1.csv"
 VALIDATION_PATH = "data/processed/incidents_validation_v1.1.csv"
+SOURCES = (TRAIN_PATH, VALIDATION_PATH)
+# Карточки, которые цитируются в инструкции как примеры: в пилот их не берём,
+# иначе проверяется узнавание примера, а не применение правила.
+GUIDELINE_EXAMPLES = ("I000009", "I000025", "I000004", "I000001", "I000003")
 SHEET_DIR = "data/annotation"
 SEED = 20261123
 
@@ -207,6 +213,7 @@ FORM_TEMPLATE = Template(
 <script>
 const CARDS = $cards_json;
 const STORAGE_KEY = "$storage_key";
+const FINGERPRINT = "$fingerprint";
 const FIELDS = ["severity", "service", "root_cause", "confidence", "comment"];
 
 function emptyAnswers() {
@@ -217,6 +224,7 @@ function emptyAnswers() {
 
 function loadAnswers() {
   try {
+    if (localStorage.getItem(STORAGE_KEY + ":fp") !== FINGERPRINT) return emptyAnswers();
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return emptyAnswers();
     const saved = JSON.parse(raw);
@@ -231,7 +239,10 @@ let answers = loadAnswers();
 let index = 0;
 
 function save() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(answers)); } catch (error) {}
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+    localStorage.setItem(STORAGE_KEY + ":fp", FINGERPRINT);
+  } catch (error) {}
 }
 
 function filled(answer) {
@@ -317,18 +328,27 @@ def build_form(sheet: pd.DataFrame, title: str, csv_name: str, storage_key: str)
         for _, row in sheet.iterrows()
     ]
     payload = json.dumps(cards, ensure_ascii=False).replace("</", "<\\/")
+    fingerprint = hashlib.sha256(
+        "|".join(card["card"] for card in cards).encode("utf-8")
+    ).hexdigest()[:16]
     return FORM_TEMPLATE.substitute(
         title=title,
         total=len(cards),
         cards_json=payload,
         csv_name=csv_name,
         storage_key=storage_key,
+        fingerprint=fingerprint,
     )
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--validation", default=VALIDATION_PATH)
+    parser.add_argument(
+        "--sources",
+        nargs="+",
+        default=list(SOURCES),
+        help="файлы выборок, из которых собирается пилот",
+    )
     parser.add_argument("--outdir", default=SHEET_DIR)
     parser.add_argument("--count", type=int, default=120)
     parser.add_argument("--repeat", type=int, default=30)
@@ -344,11 +364,15 @@ def main() -> int:
         print(f"Листы уже есть в {args.outdir}: перезапись только с --force")
         return 1
 
-    try:
-        frame = pd.read_csv(args.validation, dtype=str, keep_default_na=False)
-    except OSError as error:
-        print(f"Ошибка чтения {args.validation}: {error}")
-        return 1
+    frames = []
+    for source in args.sources:
+        try:
+            frames.append(pd.read_csv(source, dtype=str, keep_default_na=False))
+        except OSError as error:
+            print(f"Ошибка чтения {source}: {error}")
+            return 1
+    frame = pd.concat(frames, ignore_index=True)
+    frame = frame[~frame["incident_id"].isin(GUIDELINE_EXAMPLES)]
 
     try:
         sample = sample_cards(frame, args.count, args.seed)
@@ -380,6 +404,7 @@ def main() -> int:
         path.write_text(markup, encoding="utf-8")
         print(f"форма: {path}")
 
+    print(f"источники: {', '.join(str(source) for source in args.sources)}")
     print(f"первый проход: {len(sheet_a)} карточек, сценариев {sample['scenario_id'].nunique()}")
     print(f"повторный проход: {len(sheet_b)} карточек из первого листа")
     print(f"файлы: {paths['pass_a.csv']}, {paths['pass_b.csv']}, ключ {paths['key.csv']}")

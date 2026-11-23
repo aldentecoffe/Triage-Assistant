@@ -41,7 +41,7 @@ def _run(monkeypatch: pytest.MonkeyPatch, *args: str) -> int:
 
 def _cli_args(source: Path, outdir: Path, count: int, repeat: int) -> list[str]:
     return [
-        "--validation",
+        "--sources",
         str(source),
         "--outdir",
         str(outdir),
