@@ -262,7 +262,9 @@ def test_split_crossings_pass_on_grouped_split(assigned: pd.DataFrame) -> None:
 
 def test_split_crossings_fail_after_moving_one_record(assigned: pd.DataFrame) -> None:
     frame = assigned.copy()
-    index = frame.index[0]
+    sizes = frame.groupby("event_id").size()
+    shared_event = sizes[sizes > 1].index[0]
+    index = frame.index[frame["event_id"] == shared_event][0]
     frame.loc[index, "split"] = _other_split(frame.loc[index, "split"])
 
     report = _report(checks_split_crossings(frame))
@@ -294,7 +296,7 @@ def test_events_pass_on_generated_set(assigned: pd.DataFrame) -> None:
     report = _report(checks_events(assigned))
 
     assert report["status"] == "ok"
-    assert "противоречий по severity: 0" in report["value"]
+    assert "расхождений severity с последствием: 0" in report["value"]
     assert "разброс времени больше 30 мин: 0" in report["value"]
 
 
@@ -309,7 +311,30 @@ def test_events_fail_when_severity_differs_inside_event(assigned: pd.DataFrame) 
     report = _report(checks_events(frame))
 
     assert report["status"] == "fail"
-    assert "противоречий по severity: 1" in report["value"]
+    assert "расхождений severity с последствием: 1" in report["value"]
+
+
+def test_events_report_mixed_impact_scale_without_failing(assigned: pd.DataFrame) -> None:
+    """Разный масштаб влияния в одном событии — справка, а не дефект.
+
+    Карточки каскада относятся к разным сценариям, и каждая сама по себе
+    согласована со своим последствием, поэтому проверка обязана остаться ok.
+    """
+    one_per_scenario = assigned.drop_duplicates("scenario_id")
+    first = one_per_scenario.iloc[[0]]
+    other_scale = one_per_scenario[
+        one_per_scenario["severity"].ne(first["severity"].iloc[0])
+        & one_per_scenario["scenario_id"].ne(first["scenario_id"].iloc[0])
+    ]
+    frame = pd.concat([first, other_scale.iloc[[0]]], ignore_index=True)
+    frame["event_id"] = "E999999"
+    frame["created_at"] = frame["created_at"].iloc[0]
+
+    report = _report(checks_events(frame))
+
+    assert report["status"] == "ok"
+    assert "расхождений severity с последствием: 0" in report["value"]
+    assert "событий с разным масштабом влияния: 1" in report["value"]
 
 
 def test_events_fail_when_cards_of_event_are_far_apart(assigned: pd.DataFrame) -> None:

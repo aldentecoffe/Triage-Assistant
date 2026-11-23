@@ -340,7 +340,7 @@ def test_split_cli_writes_three_files(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     parts = {
         split: pd.read_csv(
-            outdir / f"incidents_{split}_v1.0.csv", dtype=str, keep_default_na=False
+            outdir / f"incidents_{split}_v1.1.csv", dtype=str, keep_default_na=False
         )
         for split in SPLIT_ORDER
     }
@@ -387,7 +387,7 @@ def test_split_cli_ignores_tampered_split_column(tmp_path: Path) -> None:
     combined = pd.concat(
         [
             pd.read_csv(
-                outdir / f"incidents_{split}_v1.0.csv", dtype=str, keep_default_na=False
+                outdir / f"incidents_{split}_v1.1.csv", dtype=str, keep_default_na=False
             )
             for split in SPLIT_ORDER
         ],

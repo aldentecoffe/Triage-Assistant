@@ -1,12 +1,13 @@
 """Доменная модель учебного набора инцидентов.
 
 Модуль содержит только данные: каталог сервисов, категории корневых причин,
-сценарии отказов и каскады. Генератор, очистка и split берут значения отсюда,
-документы в docs/lab4 ссылаются на этот же файл.
+сценарии отказов, каскады и правило критичности по формулировке последствия.
+Генератор, очистка и split берут значения отсюда, документы в docs/lab4
+ссылаются на этот же файл.
 """
 
-GENERATOR_VERSION = "1.0"
-DATASET_VERSION = "1.0"
+GENERATOR_VERSION = "1.1"
+DATASET_VERSION = "1.1"
 
 SERVICES = {
     "transport": {
@@ -57,6 +58,49 @@ ROOT_CAUSES = {
 
 SEVERITIES = ("P1", "P2", "P3", "P4")
 
+# Критичность выводится из формулировки последствия, а не разыгрывается.
+# Правило версии 1.1, полное описание в docs/lab6/annotation_guideline.md:
+#   P1 — ключевая клиентская функция не выполняется (голос и регистрация в сети,
+#        платежи, доступность магистрали), резервного пути нет;
+#   P2 — функция не выполняется для части объектов, недоступна отдельная функция
+#        или интеграция, клиент видит ошибку или неверный результат;
+#   P3 — ограниченное влияние: задержка, очередь, часть ассортимента, есть
+#        обходной путь (резерв, повтор, ручное оформление, отложенная обработка);
+#   P4 — абоненты и клиентские операции не затронуты: мониторинг, отчётность,
+#        справочники, автоматическое восстановление.
+# Значение — критичность каждого последствия сценария: сначала два русских
+# варианта в порядке impacts_ru, затем английский.
+IMPACT_SEVERITY = {
+    "SC-TRN-01": {"ru": ("P3", "P3"), "en": "P3"},
+    "SC-TRN-02": {"ru": ("P2", "P2"), "en": "P2"},
+    "SC-TRN-03": {"ru": ("P3", "P3"), "en": "P3"},
+    "SC-TRN-04": {"ru": ("P3", "P2"), "en": "P2"},
+    "SC-PLT-01": {"ru": ("P3", "P4"), "en": "P3"},
+    "SC-PLT-02": {"ru": ("P3", "P3"), "en": "P3"},
+    "SC-PLT-03": {"ru": ("P4", "P3"), "en": "P4"},
+    "SC-PLT-04": {"ru": ("P2", "P3"), "en": "P2"},
+    "SC-DB-01": {"ru": ("P2", "P2"), "en": "P2"},
+    "SC-DB-02": {"ru": ("P4", "P3"), "en": "P4"},
+    "SC-DB-03": {"ru": ("P2", "P3"), "en": "P2"},
+    "SC-DB-04": {"ru": ("P2", "P3"), "en": "P2"},
+    "SC-IMS-01": {"ru": ("P1", "P3"), "en": "P1"},
+    "SC-IMS-02": {"ru": ("P3", "P3"), "en": "P3"},
+    "SC-IMS-03": {"ru": ("P1", "P3"), "en": "P1"},
+    "SC-IMS-04": {"ru": ("P2", "P2"), "en": "P2"},
+    "SC-BIL-01": {"ru": ("P2", "P4"), "en": "P2"},
+    "SC-BIL-02": {"ru": ("P2", "P3"), "en": "P2"},
+    "SC-BIL-03": {"ru": ("P1", "P1"), "en": "P1"},
+    "SC-BIL-04": {"ru": ("P4", "P3"), "en": "P4"},
+    "SC-BSS-01": {"ru": ("P2", "P3"), "en": "P2"},
+    "SC-BSS-02": {"ru": ("P2", "P3"), "en": "P2"},
+    "SC-BSS-03": {"ru": ("P3", "P4"), "en": "P3"},
+    "SC-BSS-04": {"ru": ("P2", "P3"), "en": "P2"},
+    "SC-EXT-01": {"ru": ("P2", "P2"), "en": "P2"},
+    "SC-EXT-02": {"ru": ("P3", "P3"), "en": "P3"},
+    "SC-EXT-03": {"ru": ("P2", "P2"), "en": "P2"},
+    "SC-EXT-04": {"ru": ("P3", "P3"), "en": "P3"},
+}
+
 REGIONS = (
     ("Москва", "msk"),
     ("Санкт-Петербург", "spb"),
@@ -87,7 +131,6 @@ SCENARIOS = [
         "service": "transport",
         "root_cause": "network",
         "split": "train",
-        "severity": {"P1": 0.14, "P2": 0.38, "P3": 0.40, "P4": 0.08},
         "symptoms_ru": (
             "падает BGP-сессия с пирингом",
             "BGP-сессия с апстримом уходит в Idle",
@@ -108,7 +151,6 @@ SCENARIOS = [
         "service": "transport",
         "root_cause": "capacity",
         "split": "train",
-        "severity": {"P1": 0.05, "P2": 0.22, "P3": 0.55, "P4": 0.18},
         "symptoms_ru": (
             "таблица маршрутизации упирается в лимит FIB",
             "коммутатор теряет FIB-записи под нагрузкой",
@@ -129,7 +171,6 @@ SCENARIOS = [
         "service": "transport",
         "root_cause": "hardware",
         "split": "validation",
-        "severity": {"P1": 0.09, "P2": 0.33, "P3": 0.46, "P4": 0.12},
         "symptoms_ru": (
             "линейная карта на агрегации переходит в ошибку",
             "порт 100GE на агрегационном узле флапает",
@@ -150,7 +191,6 @@ SCENARIOS = [
         "service": "transport",
         "root_cause": "network",
         "split": "test",
-        "severity": {"P1": 0.12, "P2": 0.35, "P3": 0.43, "P4": 0.10},
         "symptoms_ru": (
             "после правки ACL появилась петля маршрутизации",
             "TTL истекает на транзитном узле, трафик зациклился",
@@ -170,8 +210,7 @@ SCENARIOS = [
         "id": "SC-PLT-01",
         "service": "platform",
         "root_cause": "hardware",
-        "split": "train",
-        "severity": {"P1": 0.06, "P2": 0.26, "P3": 0.52, "P4": 0.16},
+        "split": "test",
         "symptoms_ru": (
             "гипервизор переходит в состояние degraded",
             "кластер теряет один хост, виртуальные машины мигрируют",
@@ -192,7 +231,6 @@ SCENARIOS = [
         "service": "platform",
         "root_cause": "capacity",
         "split": "train",
-        "severity": {"P1": 0.04, "P2": 0.18, "P3": 0.58, "P4": 0.20},
         "symptoms_ru": (
             "в кластере закончились свободные адреса в пуле",
             "kubelet не может выдать адрес новым подам",
@@ -213,12 +251,11 @@ SCENARIOS = [
         "service": "platform",
         "root_cause": "software",
         "split": "validation",
-        "severity": {"P1": 0.05, "P2": 0.24, "P3": 0.55, "P4": 0.16},
         "symptoms_ru": (
-            "после обновления агент мониторинга падает",
-            "новый релиз прокси-компонента сбрасывает соединения",
+            "агент мониторинга падает на части узлов",
+            "прокси-компонент сбрасывает соединения под нагрузкой",
         ),
-        "symptom_en": "monitoring agent crashes after the upgrade",
+        "symptom_en": "the monitoring agent crashes on part of the nodes",
         "impacts_ru": (
             "метрики части узлов пропали, алерты не срабатывают",
             "часть соединений сбрасывается, растёт число ретраев",
@@ -233,8 +270,7 @@ SCENARIOS = [
         "id": "SC-PLT-04",
         "service": "platform",
         "root_cause": "change",
-        "split": "test",
-        "severity": {"P1": 0.05, "P2": 0.20, "P3": 0.57, "P4": 0.18},
+        "split": "train",
         "symptoms_ru": (
             "после релиза конфигурации поды уходят в OOMKilled",
             "лимиты памяти занижены, контейнеры падают",
@@ -255,7 +291,6 @@ SCENARIOS = [
         "service": "database",
         "root_cause": "capacity",
         "split": "validation",
-        "severity": {"P1": 0.04, "P2": 0.21, "P3": 0.57, "P4": 0.18},
         "symptoms_ru": (
             "растёт число ожиданий на блокировках",
             "очередь блокировок в СУБД не рассасывается",
@@ -275,13 +310,12 @@ SCENARIOS = [
         "id": "SC-DB-03",
         "service": "database",
         "root_cause": "software",
-        "split": "train",
-        "severity": {"P1": 0.06, "P2": 0.27, "P3": 0.52, "P4": 0.15},
+        "split": "test",
         "symptoms_ru": (
-            "после обновления СУБД растут ошибки исполнения",
-            "новый минорный релиз СУБД сбрасывает сессии",
+            "СУБД возвращает ошибки исполнения на части запросов",
+            "СУБД сбрасывает сессии при выполнении части запросов",
         ),
-        "symptom_en": "database errors grow after the minor version upgrade",
+        "symptom_en": "the database returns execution errors for part of the queries",
         "impacts_ru": (
             "часть запросов к биллингу завершается ошибкой",
             "реплика отстала от мастера и не догоняет",
@@ -297,7 +331,6 @@ SCENARIOS = [
         "service": "database",
         "root_cause": "hardware",
         "split": "train",
-        "severity": {"P1": 0.07, "P2": 0.29, "P3": 0.50, "P4": 0.14},
         "symptoms_ru": (
             "диск в RAID-массиве переходит в predictive failure",
             "растёт задержка ввода-вывода на массиве",
@@ -317,8 +350,7 @@ SCENARIOS = [
         "id": "SC-DB-04",
         "service": "database",
         "root_cause": "change",
-        "split": "test",
-        "severity": {"P1": 0.08, "P2": 0.31, "P3": 0.48, "P4": 0.13},
+        "split": "train",
         "symptoms_ru": (
             "миграция схемы не завершилась, таблица заблокирована",
             "после миграции схемы выросли ошибки запросов",
@@ -339,7 +371,6 @@ SCENARIOS = [
         "service": "ims",
         "root_cause": "capacity",
         "split": "train",
-        "severity": {"P1": 0.16, "P2": 0.39, "P3": 0.37, "P4": 0.08},
         "symptoms_ru": (
             "растёт доля отказов IMS REGISTER",
             "CSCF не успевает обрабатывать регистрации",
@@ -360,7 +391,6 @@ SCENARIOS = [
         "service": "ims",
         "root_cause": "hardware",
         "split": "train",
-        "severity": {"P1": 0.13, "P2": 0.34, "P3": 0.43, "P4": 0.10},
         "symptoms_ru": (
             "нода HSS выпала из кластера",
             "кластер HSS потерял одну из реплик",
@@ -381,12 +411,11 @@ SCENARIOS = [
         "service": "ims",
         "root_cause": "software",
         "split": "validation",
-        "severity": {"P1": 0.11, "P2": 0.33, "P3": 0.45, "P4": 0.11},
         "symptoms_ru": (
-            "после релиза VoLTE растёт число обрывов вызова",
-            "новый билд граничного контроллера сбрасывает вызовы",
+            "граничный контроллер обрывает вызовы на части попыток",
+            "граничный контроллер сбрасывает вызовы при переключении",
         ),
-        "symptom_en": "call drop rate grows after the VoLTE release",
+        "symptom_en": "the edge controller drops calls on part of the attempts",
         "impacts_ru": (
             "обрывы звонков у абонентов зоны обслуживания",
             "часть вызовов не переключается на VoWiFi",
@@ -402,7 +431,6 @@ SCENARIOS = [
         "service": "ims",
         "root_cause": "capacity",
         "split": "test",
-        "severity": {"P1": 0.15, "P2": 0.37, "P3": 0.40, "P4": 0.08},
         "symptoms_ru": (
             "после массового перезапуска терминалов всплеск регистраций",
             "пик регистраций превышает ёмкость CSCF",
@@ -423,7 +451,6 @@ SCENARIOS = [
         "service": "billing",
         "root_cause": "capacity",
         "split": "train",
-        "severity": {"P1": 0.07, "P2": 0.28, "P3": 0.51, "P4": 0.14},
         "symptoms_ru": (
             "очередь записей о звонках в биллинге растёт",
             "обработчик записей не успевает за потоком",
@@ -443,8 +470,7 @@ SCENARIOS = [
         "id": "SC-BIL-02",
         "service": "billing",
         "root_cause": "change",
-        "split": "train",
-        "severity": {"P1": 0.09, "P2": 0.31, "P3": 0.47, "P4": 0.13},
+        "split": "validation",
         "symptoms_ru": (
             "после релиза правил тарификации пошли двойные списания",
             "новые правила тарификации считают пакеты неверно",
@@ -464,8 +490,7 @@ SCENARIOS = [
         "id": "SC-BIL-03",
         "service": "billing",
         "root_cause": "external_dep",
-        "split": "validation",
-        "severity": {"P1": 0.08, "P2": 0.30, "P3": 0.49, "P4": 0.13},
+        "split": "test",
         "symptoms_ru": (
             "платёжный шлюз отвечает таймаутом",
             "провайдер платежей возвращает 503 на все запросы",
@@ -485,13 +510,12 @@ SCENARIOS = [
         "id": "SC-BIL-04",
         "service": "billing",
         "root_cause": "software",
-        "split": "test",
-        "severity": {"P1": 0.09, "P2": 0.32, "P3": 0.46, "P4": 0.13},
+        "split": "train",
         "symptoms_ru": (
-            "новый билд биллинга считает абонентскую плату с ошибкой",
-            "после выкатки расчётного модуля суммы не сходятся",
+            "расчётный модуль считает абонентскую плату с ошибкой",
+            "расчётный модуль выдаёт несходящиеся суммы",
         ),
-        "symptom_en": "the new billing build miscalculates the monthly fee",
+        "symptom_en": "the billing module miscalculates the monthly fee",
         "impacts_ru": (
             "сверка за сутки не сходится",
             "часть счетов придётся пересчитать",
@@ -506,8 +530,7 @@ SCENARIOS = [
         "id": "SC-BSS-01",
         "service": "bss",
         "root_cause": "external_dep",
-        "split": "train",
-        "severity": {"P1": 0.05, "P2": 0.23, "P3": 0.56, "P4": 0.16},
+        "split": "validation",
         "symptoms_ru": (
             "CRM отвечает таймаутом на запросы BSS",
             "интеграция с CRM отдаёт 504",
@@ -528,7 +551,6 @@ SCENARIOS = [
         "service": "bss",
         "root_cause": "capacity",
         "split": "train",
-        "severity": {"P1": 0.04, "P2": 0.19, "P3": 0.58, "P4": 0.19},
         "symptoms_ru": (
             "API заказов не держит нагрузку",
             "пул потоков API заказов переполнен",
@@ -548,8 +570,7 @@ SCENARIOS = [
         "id": "SC-BSS-03",
         "service": "bss",
         "root_cause": "change",
-        "split": "validation",
-        "severity": {"P1": 0.04, "P2": 0.20, "P3": 0.57, "P4": 0.19},
+        "split": "test",
         "symptoms_ru": (
             "после правки справочника синхронизация не прошла",
             "обновление справочника услуг разъехалось между системами",
@@ -569,8 +590,7 @@ SCENARIOS = [
         "id": "SC-BSS-04",
         "service": "bss",
         "root_cause": "hardware",
-        "split": "test",
-        "severity": {"P1": 0.06, "P2": 0.24, "P3": 0.54, "P4": 0.16},
+        "split": "train",
         "symptoms_ru": (
             "узел очереди перестал отвечать",
             "кластер очереди потерял кворум",
@@ -591,7 +611,6 @@ SCENARIOS = [
         "service": "external",
         "root_cause": "external_dep",
         "split": "train",
-        "severity": {"P1": 0.05, "P2": 0.22, "P3": 0.56, "P4": 0.17},
         "symptoms_ru": (
             "SMS-шлюз не принимает сообщения",
             "провайдер SMS отдаёт ошибку авторизации",
@@ -612,7 +631,6 @@ SCENARIOS = [
         "service": "external",
         "root_cause": "capacity",
         "split": "train",
-        "severity": {"P1": 0.03, "P2": 0.18, "P3": 0.59, "P4": 0.20},
         "symptoms_ru": (
             "поставщик ограничил частоту запросов",
             "API поставщика отвечает 429",
@@ -633,10 +651,9 @@ SCENARIOS = [
         "service": "external",
         "root_cause": "change",
         "split": "validation",
-        "severity": {"P1": 0.05, "P2": 0.24, "P3": 0.55, "P4": 0.16},
         "symptoms_ru": (
             "после ротации сертификат на шлюзе просрочен",
-            "TLS-соединение на шлюзе не устанавливается",
+            "после ротации сертификата TLS-соединение не устанавливается",
         ),
         "symptom_en": "certificate is expired after rotation, TLS handshake fails",
         "impacts_ru": (
@@ -654,7 +671,6 @@ SCENARIOS = [
         "service": "external",
         "root_cause": "external_dep",
         "split": "test",
-        "severity": {"P1": 0.04, "P2": 0.21, "P3": 0.57, "P4": 0.18},
         "symptoms_ru": (
             "адаптер не разбирает новый формат ответа провайдера",
             "поставщик перевёл API на новую версию",

@@ -1,4 +1,4 @@
-"""Разведочный анализ и проверки качества набора инцидентов версии 1.0.
+"""Разведочный анализ и проверки качества набора инцидентов версии 1.1.
 
 Скрипт отвечает на вопросы лабораторной 5: объём и пропуски, поддержка
 классов, дубликаты и почти-дубликаты, пересечение выборок, перенос словаря
@@ -36,8 +36,10 @@ from matplotlib.ticker import FuncFormatter  # noqa: E402
 from incident_taxonomy import (  # noqa: E402
     CASCADES,
     DEFECTS,
+    IMPACT_SEVERITY,
     REQUIRED_COLUMNS,
     ROOT_CAUSES,
+    SCENARIOS,
     SEVERITIES,
     SERVICES,
 )
@@ -51,15 +53,15 @@ EVENT_TIME_LIMIT = 30  # минут между карточками одного
 MIN_SPLIT_CLASS_SUPPORT = 30  # меньше записей на класс в выборке - оценка по классу шумная
 PROXY_WARN_LEVEL = 0.20  # Cramer's V, выше которого поле годится как подсказка метки
 
-EXPECTED_CLEAN = 6000  # объём версии 1.0, закреплённый в Data Card и тестах
+EXPECTED_CLEAN = 6000  # объём версии 1.1, закреплённый в Data Card и тестах
 
 DATA_PATHS = {
-    "raw": "data/raw/incidents_raw_v1.0.csv",
-    "clean": "data/interim/incidents_clean_v1.0.csv",
-    "log": "data/interim/cleaning_log_v1.0.csv",
-    "train": "data/processed/incidents_train_v1.0.csv",
-    "validation": "data/processed/incidents_validation_v1.0.csv",
-    "test": "data/processed/incidents_test_v1.0.csv",
+    "raw": "data/raw/incidents_raw_v1.1.csv",
+    "clean": "data/interim/incidents_clean_v1.1.csv",
+    "log": "data/interim/cleaning_log_v1.1.csv",
+    "train": "data/processed/incidents_train_v1.1.csv",
+    "validation": "data/processed/incidents_validation_v1.1.csv",
+    "test": "data/processed/incidents_test_v1.1.csv",
 }
 
 TOKEN_RE = re.compile(r"[a-zа-яё]+")
@@ -193,11 +195,11 @@ def checks_volume(frames: dict[str, pd.DataFrame]) -> list[dict[str, str]]:
     defects = sum(DEFECTS.values())
     status = "ok" if len(clean) == expected == EXPECTED_CLEAN and len(log) == defects else "fail"
     if status == "ok":
-        decision = f"ожидание {expected}; набор версии 1.0 воспроизводится"
+        decision = f"ожидание {expected}; набор версии 1.1 воспроизводится"
     else:
         decision = (
             f"ожидание {expected}, в очищенном наборе {len(clean)}, в журнале {len(log)}: "
-            "набор не совпадает с версией 1.0, нужна пересборка или новая версия Data Card"
+            "набор не совпадает с версией 1.1, нужна пересборка или новая версия Data Card"
         )
     return [
         check(
@@ -223,7 +225,7 @@ def checks_schema(raw: pd.DataFrame, clean: pd.DataFrame) -> list[dict[str, str]
         check(
             "Схема",
             f"{len(clean.columns)} столбцов, расхождений с REQUIRED_COLUMNS: {len(problems)}",
-            "схема v1.0 без изменений" if not problems else "; ".join(problems),
+            "схема v1.1 без изменений" if not problems else "; ".join(problems),
             "ok" if not problems else "fail",
         ),
     ]
@@ -445,27 +447,62 @@ def checks_coverage(frame: pd.DataFrame) -> list[dict[str, str]]:
     ]
 
 
+def impact_severity_map() -> dict[str, list[tuple[str, str]]]:
+    """Последствие сценария и его класс: по этому правилу выставляется severity."""
+    mapping: dict[str, list[tuple[str, str]]] = {}
+    for scenario in SCENARIOS:
+        marks = IMPACT_SEVERITY[scenario["id"]]
+        rows = list(zip(scenario["impacts_ru"], marks["ru"]))
+        rows.append((scenario["impact_en"], marks["en"]))
+        mapping[scenario["id"]] = rows
+    return mapping
+
+
+def severity_mismatches(frame: pd.DataFrame) -> pd.Series:
+    """Карточки, где severity не совпадает с классом последствия из текста."""
+    mapping = impact_severity_map()
+    text = frame["description"].astype("string").str.lower().fillna("")
+
+    def expected(row) -> str:
+        for phrase, label in mapping.get(row["scenario_id"], []):
+            if phrase.lower() in row["_text"]:
+                return label
+        return "<не найдено>"
+
+    work = frame.assign(_text=text)
+    found = work.apply(expected, axis=1)
+    return found.ne(work["severity"])
+
+
 def checks_events(frame: pd.DataFrame) -> list[dict[str, str]]:
     if frame.empty:
         return _empty("Согласованность события")
     work = frame.assign(
         created_at=pd.to_datetime(frame["created_at"], format="%Y-%m-%dT%H:%M", errors="coerce")
     )
-    severity_variants = int((work.groupby("event_id")["severity"].nunique() > 1).sum())
+    # Сверка опирается на текст последствия, поэтому на урезанных рамках
+    # из тестов, где описания нет, она пропускается.
+    if {"description", "scenario_id"}.issubset(frame.columns):
+        mismatches = int(severity_mismatches(frame).sum())
+    else:
+        mismatches = 0
+    mixed_events = int((work.groupby("event_id")["severity"].nunique() > 1).sum())
     multi_service = int((work.groupby("event_id")["service"].nunique() > 2).sum())
     spans = work.groupby("event_id")["created_at"].max() - work.groupby("event_id")["created_at"].min()
     long_events = int((spans > pd.Timedelta(minutes=EVENT_TIME_LIMIT)).sum())
     unparsed = int(work["created_at"].isna().sum())
     sizes = work.groupby("event_id").size()
-    problems = severity_variants + long_events + unparsed + multi_service
+    problems = mismatches + long_events + unparsed + multi_service
     return [
         check(
             "Согласованность события",
             f"{work['event_id'].nunique()} событий, карточек в событии {int(sizes.min())}-{int(sizes.max())}, "
-            f"противоречий по severity: {severity_variants}, сервисов больше двух: {multi_service}, "
+            f"расхождений severity с последствием: {mismatches}, событий с разным масштабом влияния: "
+            f"{mixed_events}, сервисов больше двух: {multi_service}, "
             f"разброс времени больше {EVENT_TIME_LIMIT} мин: {long_events}, "
             f"нечитаемых дат: {unparsed}",
-            "карточки события не независимы: оценка и бутстрэп считаются по событиям и сценариям",
+            "критичность карточки выводится из её последствия; карточки события не независимы, "
+            "оценка и бутстрэп считаются по событиям и сценариям",
             "ok" if problems == 0 else "fail",
         ),
     ]

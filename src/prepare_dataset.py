@@ -60,9 +60,9 @@ def clean(frame: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--raw", default="data/raw/incidents_raw_v1.0.csv")
-    parser.add_argument("--out", default="data/interim/incidents_clean_v1.0.csv")
-    parser.add_argument("--log", default="data/interim/cleaning_log_v1.0.csv")
+    parser.add_argument("--raw", default="data/raw/incidents_raw_v1.1.csv")
+    parser.add_argument("--out", default="data/interim/incidents_clean_v1.1.csv")
+    parser.add_argument("--log", default="data/interim/cleaning_log_v1.1.csv")
     args = parser.parse_args()
 
     try:

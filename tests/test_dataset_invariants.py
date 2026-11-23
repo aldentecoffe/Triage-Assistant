@@ -10,6 +10,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
@@ -21,7 +22,6 @@ from incident_taxonomy import (  # noqa: E402
     ROOT_CAUSES,
     SCENARIOS,
     SERVICES,
-    SEVERITIES,
     SPLIT_SHARES,
 )
 from prepare_dataset import clean  # noqa: E402
@@ -31,13 +31,6 @@ from split_dataset import assign, find_violations  # noqa: E402
 def test_every_scenario_has_a_known_split() -> None:
     unknown = {scenario["id"]: scenario["split"] for scenario in SCENARIOS}
     assert set(unknown.values()) <= set(SPLIT_SHARES)
-
-
-def test_severity_weights_are_probabilities() -> None:
-    for scenario in SCENARIOS:
-        weights = [scenario["severity"][label] for label in SEVERITIES]
-        assert sum(weights) == pytest.approx(1.0), scenario["id"]
-        assert min(weights) >= 0, scenario["id"]
 
 
 def test_every_metric_unit_can_be_translated() -> None:
@@ -62,6 +55,17 @@ def test_root_causes_are_all_used() -> None:
     assert used == set(ROOT_CAUSES)
 
 
+def test_train_and_test_cover_all_root_causes(default_frame: pd.DataFrame) -> None:
+    """Обещание ЛР 6: в train и test размечены все шесть категорий причин.
+
+    Validation по плану покрывает пять: сетевые сценарии ушли в train и test,
+    поэтому проверка идёт только по двум выборкам, как записано в docs/lab6.
+    """
+    for split in ("train", "test"):
+        used = set(default_frame.loc[default_frame["split"] == split, "root_cause"])
+        assert used == set(ROOT_CAUSES), split
+
+
 def test_default_dataset_matches_the_data_card() -> None:
     rows = build_rows()
     assert len(rows) == 6008
@@ -69,7 +73,7 @@ def test_default_dataset_matches_the_data_card() -> None:
     frame = assign(clean(_as_frame(rows))[0])
     assert len(frame) == 6000
     assert frame["scenario_id"].nunique() == 28
-    assert frame["event_id"].nunique() == 4110
+    assert frame["event_id"].nunique() == 4097
     assert frame["split"].value_counts().to_dict() == {
         "train": 3600,
         "validation": 1200,

@@ -130,7 +130,7 @@ def print_markdown(frame: pd.DataFrame) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--clean", default="data/interim/incidents_clean_v1.0.csv")
+    parser.add_argument("--clean", default="data/interim/incidents_clean_v1.1.csv")
     parser.add_argument("--outdir", default="data/processed")
     args = parser.parse_args()
 
@@ -157,7 +157,7 @@ def main() -> int:
     outdir.mkdir(parents=True, exist_ok=True)
     for split, share in SPLIT_SHARES.items():
         part = frame[frame["split"] == split]
-        part.to_csv(outdir / f"incidents_{split}_v1.0.csv", index=False, encoding="utf-8")
+        part.to_csv(outdir / f"incidents_{split}_v1.1.csv", index=False, encoding="utf-8")
         print(f"{split}: {len(part)} записей (плановая доля {share:.0%})")
 
     print()

@@ -1,7 +1,8 @@
-"""Генератор синтетических инцидентов версии 1.0.
+"""Генератор синтетических инцидентов версии 1.1.
 
 Создаёт детерминированный набор по каталогу сценариев из incident_taxonomy,
-добавляет контрольные дефекты и пишет сырой CSV.
+добавляет контрольные дефекты и пишет сырой CSV. Критичность выводится
+из формулировки последствия по таблице IMPACT_SEVERITY.
 
 Запуск:
     python src/generate_incidents.py --count 6000
@@ -20,12 +21,12 @@ from incident_taxonomy import (
     DATASET_VERSION,
     DEFECTS,
     GENERATOR_VERSION,
+    IMPACT_SEVERITY,
     MONITORING_SOURCES,
     REGIONS,
     REQUIRED_COLUMNS,
     RU_SHARE,
     SCENARIOS,
-    SEVERITIES,
     SPLIT_SHARES,
 )
 from text_utils import text_hash
@@ -96,8 +97,8 @@ def draw_value(threshold: int, unit: str, direction: str, rng: random.Random) ->
 
 def compose_text(
     scenario: dict, host: str, ci: str, rng: random.Random
-) -> tuple[str, str, str]:
-    """Собирает заголовок и описание; возвращает (title, description, language)."""
+) -> tuple[str, str, str, str]:
+    """Собирает заголовок и описание; возвращает (title, description, language, severity)."""
     metric_name, threshold, unit, direction = rng.choice(scenario["metrics"])
     value = draw_value(threshold, unit, direction, rng)
     value_text = _fmt_number(value)
@@ -106,8 +107,13 @@ def compose_text(
     unit_en = UNIT_EN[unit]
 
     symptom_ru = rng.choice(scenario["symptoms_ru"])
-    impact_ru = rng.choice(scenario["impacts_ru"])
+    impact_index = rng.randrange(len(scenario["impacts_ru"]))
+    impact_ru = scenario["impacts_ru"][impact_index]
     language = "ru" if rng.random() < RU_SHARE else "en"
+    severity_by_impact = IMPACT_SEVERITY[scenario["id"]]
+    severity = (
+        severity_by_impact["ru"][impact_index] if language == "ru" else severity_by_impact["en"]
+    )
 
     if language == "ru":
         symptom = symptom_ru[0].upper() + symptom_ru[1:]
@@ -134,7 +140,7 @@ def compose_text(
         )
         title = f"{symptom_en[0].upper()}{symptom_en[1:]}: {metric_name}={value_en}{unit_en}"
 
-    return title, description, language
+    return title, description, language, severity
 
 
 def allocate_counts(total: int) -> dict[str, int]:
@@ -168,10 +174,6 @@ def _new_event(index: list[int]) -> str:
     return f"E{index[0]:06d}"
 
 
-def _draw_severity(scenario: dict, rng: random.Random) -> str:
-    return rng.choices(SEVERITIES, weights=[scenario["severity"][s] for s in SEVERITIES])[0]
-
-
 def _draw_time(rng: random.Random) -> datetime:
     return EPOCH + timedelta(days=rng.randint(0, TIME_SPAN_DAYS), minutes=rng.randint(0, 1439))
 
@@ -196,11 +198,11 @@ def build_rows(total: int = 6000, seed: int = SEED) -> list[dict]:
         ci_counter[0] += rng.randint(7, 97)
         return f"CI-{ci_counter[0]:06d}"
 
-    def make_record(scenario: dict, event_id: str, severity: str, started: datetime) -> dict:
+    def make_record(scenario: dict, event_id: str, started: datetime) -> dict:
         region_ru, region_code = rng.choice(REGIONS)
         host = f"host-{region_code}{rng.randint(1, 200):03d}"
         ci = next_ci()
-        title, description, language = compose_text(scenario, host, ci, rng)
+        title, description, language, severity = compose_text(scenario, host, ci, rng)
         created = started + timedelta(minutes=rng.randint(0, 30))
         return {
             "incident_id": "",
@@ -234,29 +236,26 @@ def build_rows(total: int = 6000, seed: int = SEED) -> list[dict]:
         )
         for _ in range(available):
             event_id = _new_event(event_index)
-            severity = _draw_severity(scenarios[left_id], rng)
             started = _draw_time(rng)
             for _ in range(rng.randint(2, 3)):
-                records.append(make_record(scenarios[left_id], event_id, severity, started))
+                records.append(make_record(scenarios[left_id], event_id, started))
                 counts[left_id] -= 1
             for _ in range(rng.randint(1, 2)):
-                records.append(make_record(scenarios[right_id], event_id, severity, started))
+                records.append(make_record(scenarios[right_id], event_id, started))
                 counts[right_id] -= 1
 
     # Остальные записи: часть объединяется в события по 2-3 записи.
     for scenario_id, remaining in counts.items():
         scenario = scenarios[scenario_id]
         event_id = ""
-        severity = ""
         started = EPOCH
         size_left = 0
         while remaining > 0:
             if size_left == 0:
                 event_id = _new_event(event_index)
-                severity = _draw_severity(scenario, rng)
                 started = _draw_time(rng)
                 size_left = rng.randint(2, 3) if rng.random() < 0.3 else 1
-            records.append(make_record(scenario, event_id, severity, started))
+            records.append(make_record(scenario, event_id, started))
             size_left -= 1
             remaining -= 1
 
@@ -334,7 +333,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--count", type=int, default=6000, help="целевое число валидных записей")
     parser.add_argument("--seed", type=int, default=SEED)
-    parser.add_argument("--out", default="data/raw/incidents_raw_v1.0.csv")
+    parser.add_argument("--out", default="data/raw/incidents_raw_v1.1.csv")
     args = parser.parse_args()
 
     try:
