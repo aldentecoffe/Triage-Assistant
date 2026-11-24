@@ -1,0 +1,1011 @@
+{
+  "success": [
+    {
+      "incident_id": "I000051",
+      "query": {
+        "description": "Новые правила тарификации считают пакеты неверно. rating_errors = 170 шт/мин, порог 90 шт/мин. В поддержку пошли обращения по списаниям. Объект CI-422969.",
+        "service": "billing",
+        "root_cause": "change",
+        "severity": "P3",
+        "language": "ru",
+        "segment": "coverage_low"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I001065",
+          "score": 0.399632,
+          "grade": 1,
+          "service": "database",
+          "root_cause": "change",
+          "severity": "P3"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I005281",
+          "score": 0.360992,
+          "grade": 1,
+          "service": "database",
+          "root_cause": "change",
+          "severity": "P2"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I004898",
+          "score": 0.357477,
+          "grade": 1,
+          "service": "database",
+          "root_cause": "change",
+          "severity": "P3"
+        }
+      ],
+      "ndcg": 1.0,
+      "diagnosis": "первая карточка совпала по метке «причина», вторая метка не совпала; в top-3 карточек с той же услугой — 0, с той же причиной — 3",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "170",
+        "мин",
+        "90",
+        "шт"
+      ]
+    },
+    {
+      "incident_id": "I000004",
+      "query": {
+        "description": "CRM отвечает таймаутом на запросы BSS. crm_response_ms = 15 530 мс, порог 9 000 мс. Операторы не могут оформить заказ. Объект CI-429182.",
+        "service": "bss",
+        "root_cause": "external_dep",
+        "severity": "P2",
+        "language": "ru",
+        "segment": "coverage_low"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I002473",
+          "score": 0.451553,
+          "grade": 1,
+          "service": "bss",
+          "root_cause": "capacity",
+          "severity": "P3"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I003341",
+          "score": 0.441641,
+          "grade": 1,
+          "service": "bss",
+          "root_cause": "capacity",
+          "severity": "P3"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I000788",
+          "score": 0.435996,
+          "grade": 1,
+          "service": "bss",
+          "root_cause": "capacity",
+          "severity": "P3"
+        }
+      ],
+      "ndcg": 1.0,
+      "diagnosis": "первая карточка совпала по метке «услуга», вторая метка не совпала; в top-3 карточек с той же услугой — 3, с той же причиной — 0",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "мс",
+        "оформить",
+        "000",
+        "порог",
+        "не"
+      ]
+    },
+    {
+      "incident_id": "I000053",
+      "query": {
+        "description": "Lock waiters in the database keep growing. lock_waiters is 80 sessions against threshold 60 sessions. Order API requests hang for up to 30 s. Item CI-410902.",
+        "service": "database",
+        "root_cause": "capacity",
+        "severity": "P2",
+        "language": "en",
+        "segment": "coverage_mid"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I000159",
+          "score": 0.299189,
+          "grade": 1,
+          "service": "ims",
+          "root_cause": "capacity",
+          "severity": "P1"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I001247",
+          "score": 0.299189,
+          "grade": 1,
+          "service": "ims",
+          "root_cause": "capacity",
+          "severity": "P1"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I001272",
+          "score": 0.299189,
+          "grade": 1,
+          "service": "ims",
+          "root_cause": "capacity",
+          "severity": "P1"
+        }
+      ],
+      "ndcg": 1.0,
+      "diagnosis": "первая карточка совпала по метке «причина», вторая метка не совпала; в top-3 карточек с той же услугой — 0, с той же причиной — 3",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "in",
+        "growing",
+        "the",
+        "is",
+        "against"
+      ]
+    },
+    {
+      "incident_id": "I000035",
+      "query": {
+        "description": "Certificate is expired after rotation, TLS handshake fails. cert_days_left is -11 days against threshold -2 days. The integration with the external system is unavailable. Item CI-445914.",
+        "service": "external",
+        "root_cause": "change",
+        "severity": "P2",
+        "language": "en",
+        "segment": "coverage_low"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I005111",
+          "score": 0.329305,
+          "grade": 1,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P2"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I000059",
+          "score": 0.32785,
+          "grade": 1,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P2"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I000403",
+          "score": 0.32785,
+          "grade": 1,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P2"
+        }
+      ],
+      "ndcg": 1.0,
+      "diagnosis": "первая карточка совпала по метке «причина», вторая метка не совпала; в top-3 карточек с той же услугой — 0, с той же причиной — 3",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "after",
+        "unavailable",
+        "is",
+        "the",
+        "with"
+      ]
+    },
+    {
+      "incident_id": "I000017",
+      "query": {
+        "description": "Граничный контроллер сбрасывает вызовы при переключении. call_drop_pct = 7,2 %, порог 6 %. Часть вызовов не переключается на VoWiFi. Объект CI-413286.",
+        "service": "ims",
+        "root_cause": "software",
+        "severity": "P3",
+        "language": "ru",
+        "segment": "coverage_low"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I000005",
+          "score": 0.279382,
+          "grade": 1,
+          "service": "ims",
+          "root_cause": "hardware",
+          "severity": "P3"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I000126",
+          "score": 0.279382,
+          "grade": 1,
+          "service": "ims",
+          "root_cause": "hardware",
+          "severity": "P3"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I000910",
+          "score": 0.279382,
+          "grade": 1,
+          "service": "ims",
+          "root_cause": "hardware",
+          "severity": "P3"
+        }
+      ],
+      "ndcg": 1.0,
+      "diagnosis": "первая карточка совпала по метке «услуга», вторая метка не совпала; в top-3 карточек с той же услугой — 3, с той же причиной — 0",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "переключении",
+        "порог",
+        "при",
+        "часть"
+      ]
+    },
+    {
+      "incident_id": "I000106",
+      "query": {
+        "description": "Агент мониторинга падает на части узлов; agent_restarts 22 шт/час. Часть соединений сбрасывается, растёт число ретраев. CI-396095, узел host-khv028.",
+        "service": "platform",
+        "root_cause": "software",
+        "severity": "P3",
+        "language": "ru",
+        "segment": "coverage_low"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I004502",
+          "score": 0.400024,
+          "grade": 1,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P3"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I000927",
+          "score": 0.356582,
+          "grade": 1,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P2"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I001890",
+          "score": 0.352318,
+          "grade": 1,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P2"
+        }
+      ],
+      "ndcg": 1.0,
+      "diagnosis": "первая карточка совпала по метке «услуга», вторая метка не совпала; в top-3 карточек с той же услугой — 3, с той же причиной — 0",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "22",
+        "час",
+        "шт",
+        "часть",
+        "на"
+      ]
+    },
+    {
+      "incident_id": "I000094",
+      "query": {
+        "description": "Порт 100GE на агрегационном узле флапает. if_errors_crc = 1 792 шт/мин, порог 1 000 шт/мин. Часть площадок переключилась на резервный путь. Объект CI-392171.",
+        "service": "transport",
+        "root_cause": "hardware",
+        "severity": "P3",
+        "language": "ru",
+        "segment": "coverage_low"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I001826",
+          "score": 0.317465,
+          "grade": 1,
+          "service": "transport",
+          "root_cause": "network",
+          "severity": "P3"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I001008",
+          "score": 0.314435,
+          "grade": 1,
+          "service": "transport",
+          "root_cause": "network",
+          "severity": "P3"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I004402",
+          "score": 0.311487,
+          "grade": 1,
+          "service": "transport",
+          "root_cause": "network",
+          "severity": "P3"
+        }
+      ],
+      "ndcg": 1.0,
+      "diagnosis": "первая карточка совпала по метке «услуга», вторая метка не совпала; в top-3 карточек с той же услугой — 3, с той же причиной — 0",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "мин",
+        "резервный",
+        "шт",
+        "порог",
+        "часть"
+      ]
+    },
+    {
+      "incident_id": "I000073",
+      "query": {
+        "description": "Новые правила тарификации считают пакеты неверно на host-khv065. double_charge_events держится 524 шт/час при пороге 300 шт/час. В поддержку пошли обращения по списаниям. Объект CI-422710.",
+        "service": "billing",
+        "root_cause": "change",
+        "severity": "P3",
+        "language": "ru",
+        "segment": "coverage_low"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I002648",
+          "score": 0.413844,
+          "grade": 1,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P3"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I005927",
+          "score": 0.404666,
+          "grade": 1,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P3"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I001395",
+          "score": 0.404484,
+          "grade": 1,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P3"
+        }
+      ],
+      "ndcg": 1.0,
+      "diagnosis": "первая карточка совпала по метке «причина», вторая метка не совпала; в top-3 карточек с той же услугой — 0, с той же причиной — 3",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "час",
+        "по",
+        "шт",
+        "держится",
+        "пороге"
+      ]
+    },
+    {
+      "incident_id": "I000182",
+      "query": {
+        "description": "CRM responds with a timeout to BSS requests. crm_response_ms is 10 790 ms against threshold 9 000 ms. Operators cannot place orders. Item CI-433690.",
+        "service": "bss",
+        "root_cause": "external_dep",
+        "severity": "P2",
+        "language": "en",
+        "segment": "coverage_mid"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I003128",
+          "score": 0.488323,
+          "grade": 1,
+          "service": "bss",
+          "root_cause": "capacity",
+          "severity": "P2"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I000828",
+          "score": 0.477286,
+          "grade": 1,
+          "service": "bss",
+          "root_cause": "capacity",
+          "severity": "P2"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I003784",
+          "score": 0.477286,
+          "grade": 1,
+          "service": "bss",
+          "root_cause": "capacity",
+          "severity": "P2"
+        }
+      ],
+      "ndcg": 1.0,
+      "diagnosis": "первая карточка совпала по метке «услуга», вторая метка не совпала; в top-3 карточек с той же услугой — 3, с той же причиной — 0",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "ms",
+        "10",
+        "orders",
+        "cannot",
+        "is"
+      ]
+    },
+    {
+      "incident_id": "I000078",
+      "query": {
+        "description": "Очередь блокировок в СУБД не рассасывается на host-msk088. avg_lock_wait_ms держится 4 680 мс при пороге 4 000 мс. Запросы API заказов висят по 30 секунд. Объект CI-403035.",
+        "service": "database",
+        "root_cause": "capacity",
+        "severity": "P2",
+        "language": "ru",
+        "segment": "coverage_mid"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I003912",
+          "score": 0.448952,
+          "grade": 1,
+          "service": "bss",
+          "root_cause": "capacity",
+          "severity": "P2"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I000458",
+          "score": 0.417139,
+          "grade": 1,
+          "service": "bss",
+          "root_cause": "capacity",
+          "severity": "P2"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I000725",
+          "score": 0.411347,
+          "grade": 1,
+          "service": "bss",
+          "root_cause": "capacity",
+          "severity": "P2"
+        }
+      ],
+      "ndcg": 1.0,
+      "diagnosis": "первая карточка совпала по метке «причина», вторая метка не совпала; в top-3 карточек с той же услугой — 0, с той же причиной — 3",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "мс",
+        "000",
+        "api",
+        "очередь",
+        "заказов"
+      ]
+    }
+  ],
+  "failure": [
+    {
+      "incident_id": "I001708",
+      "query": {
+        "description": "После релиза правил тарификации пошли двойные списания на host-ekb052. rating_errors держится 143 шт/мин при пороге 90 шт/мин. Абоненты получают некорректные счета. Объект CI-426291.",
+        "service": "billing",
+        "root_cause": "change",
+        "severity": "P2",
+        "language": "ru",
+        "segment": "coverage_low"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I003109",
+          "score": 0.382207,
+          "grade": 0,
+          "service": "ims",
+          "root_cause": "hardware",
+          "severity": "P3"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I001677",
+          "score": 0.352831,
+          "grade": 0,
+          "service": "transport",
+          "root_cause": "network",
+          "severity": "P3"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I000890",
+          "score": 0.319762,
+          "grade": 0,
+          "service": "ims",
+          "root_cause": "hardware",
+          "severity": "P3"
+        }
+      ],
+      "ndcg": 0.0,
+      "diagnosis": "ни одна карточка не совпала по меткам, сходство дали общие слова формулировки; в top-3 карточек с той же услугой — 0, с той же причиной — 0",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "143",
+        "мин",
+        "шт",
+        "на",
+        "держится"
+      ]
+    },
+    {
+      "incident_id": "I000022",
+      "query": {
+        "description": "CRM отвечает таймаутом на запросы BSS. crm_timeout_pct = 23 %, порог 18 %. Операторы не могут оформить заказ. Объект CI-436563.",
+        "service": "bss",
+        "root_cause": "external_dep",
+        "severity": "P2",
+        "language": "ru",
+        "segment": "coverage_low"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I000847",
+          "score": 0.290621,
+          "grade": 0,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P3"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I003444",
+          "score": 0.288238,
+          "grade": 0,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P3"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I003155",
+          "score": 0.20051,
+          "grade": 0,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P2"
+        }
+      ],
+      "ndcg": 0.0,
+      "diagnosis": "ни одна карточка не совпала по меткам, сходство дали общие слова формулировки; в top-3 карточек с той же услугой — 0, с той же причиной — 0",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "23",
+        "18",
+        "порог"
+      ]
+    },
+    {
+      "incident_id": "I000015",
+      "query": {
+        "description": "Растёт число ожиданий на блокировках; lock_waiters 100 сессий. Часть транзакций отваливается по таймауту. CI-404063, узел host-spb172.",
+        "service": "database",
+        "root_cause": "capacity",
+        "severity": "P2",
+        "language": "ru",
+        "segment": "coverage_low"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I001787",
+          "score": 0.27052,
+          "grade": 0,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P3"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I001265",
+          "score": 0.266372,
+          "grade": 0,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P3"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I005987",
+          "score": 0.244874,
+          "grade": 0,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P3"
+        }
+      ],
+      "ndcg": 0.0,
+      "diagnosis": "ни одна карточка не совпала по меткам, сходство дали общие слова формулировки; в top-3 карточек с той же услугой — 0, с той же причиной — 0",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "по",
+        "100",
+        "узел",
+        "часть"
+      ]
+    },
+    {
+      "incident_id": "I000037",
+      "query": {
+        "description": "После ротации сертификата TLS-соединение не устанавливается. cert_days_left = -4 дней, порог -2 дней. Часть заявок не уходит поставщику. Объект CI-444179.",
+        "service": "external",
+        "root_cause": "change",
+        "severity": "P2",
+        "language": "ru",
+        "segment": "coverage_low"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I000491",
+          "score": 0.28349,
+          "grade": 0,
+          "service": "bss",
+          "root_cause": "capacity",
+          "severity": "P3"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I001490",
+          "score": 0.28349,
+          "grade": 0,
+          "service": "bss",
+          "root_cause": "capacity",
+          "severity": "P3"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I001633",
+          "score": 0.28349,
+          "grade": 0,
+          "service": "bss",
+          "root_cause": "capacity",
+          "severity": "P3"
+        }
+      ],
+      "ndcg": 0.0,
+      "diagnosis": "ни одна карточка не совпала по меткам, сходство дали общие слова формулировки; в top-3 карточек с той же услугой — 0, с той же причиной — 0",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "заявок",
+        "не",
+        "порог",
+        "часть"
+      ]
+    },
+    {
+      "incident_id": "I000118",
+      "query": {
+        "description": "Граничный контроллер обрывает вызовы на части попыток. call_drop_pct = 7,1 %, порог 6 %. Обрывы звонков у абонентов зоны обслуживания. Объект CI-416758.",
+        "service": "ims",
+        "root_cause": "software",
+        "severity": "P1",
+        "language": "ru",
+        "segment": "coverage_low"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I000412",
+          "score": 0.173615,
+          "grade": 0,
+          "service": "transport",
+          "root_cause": "capacity",
+          "severity": "P2"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I000628",
+          "score": 0.173615,
+          "grade": 0,
+          "service": "transport",
+          "root_cause": "capacity",
+          "severity": "P2"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I001816",
+          "score": 0.173615,
+          "grade": 0,
+          "service": "transport",
+          "root_cause": "capacity",
+          "severity": "P2"
+        }
+      ],
+      "ndcg": 0.0,
+      "diagnosis": "ни одна карточка не совпала по меткам, сходство дали общие слова формулировки; в top-3 карточек с той же услугой — 0, с той же причиной — 0",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "части",
+        "порог",
+        "на"
+      ]
+    },
+    {
+      "incident_id": "I000033",
+      "query": {
+        "description": "Прокси-компонент сбрасывает соединения под нагрузкой; conntrack_drops 492 шт/мин. Часть соединений сбрасывается, растёт число ретраев. CI-395485, узел host-kzn104.",
+        "service": "platform",
+        "root_cause": "software",
+        "severity": "P3",
+        "language": "ru",
+        "segment": "coverage_low"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I002314",
+          "score": 0.29945,
+          "grade": 0,
+          "service": "transport",
+          "root_cause": "capacity",
+          "severity": "P2"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I005198",
+          "score": 0.29945,
+          "grade": 0,
+          "service": "transport",
+          "root_cause": "capacity",
+          "severity": "P2"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I001851",
+          "score": 0.273626,
+          "grade": 0,
+          "service": "transport",
+          "root_cause": "capacity",
+          "severity": "P2"
+        }
+      ],
+      "ndcg": 0.0,
+      "diagnosis": "ни одна карточка не совпала по меткам, сходство дали общие слова формулировки; в top-3 карточек с той же услугой — 0, с той же причиной — 0",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "нагрузкой",
+        "под",
+        "узел",
+        "шт"
+      ]
+    },
+    {
+      "incident_id": "I000190",
+      "query": {
+        "description": "Линейная карта на агрегации переходит в ошибку. link_uptime = 18 с, порог 60 с. Кольцо агрегации в деградации, потеряна половина ёмкости. Объект CI-392723.",
+        "service": "transport",
+        "root_cause": "hardware",
+        "severity": "P3",
+        "language": "ru",
+        "segment": "coverage_low"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I004737",
+          "score": 0.203761,
+          "grade": 0,
+          "service": "external",
+          "root_cause": "external_dep",
+          "severity": "P2"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I002575",
+          "score": 0.186344,
+          "grade": 0,
+          "service": "external",
+          "root_cause": "external_dep",
+          "severity": "P2"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I003891",
+          "score": 0.172855,
+          "grade": 0,
+          "service": "database",
+          "root_cause": "change",
+          "severity": "P2"
+        }
+      ],
+      "ndcg": 0.0,
+      "diagnosis": "ни одна карточка не совпала по меткам, сходство дали общие слова формулировки; в top-3 карточек с той же услугой — 0, с той же причиной — 0",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "60",
+        "ошибку",
+        "на"
+      ]
+    },
+    {
+      "incident_id": "I001894",
+      "query": {
+        "description": "После релиза правил тарификации пошли двойные списания; double_charge_events 394 шт/час. Абоненты получают некорректные счета. CI-425115, узел host-kzn078.",
+        "service": "billing",
+        "root_cause": "change",
+        "severity": "P2",
+        "language": "ru",
+        "segment": "coverage_low"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I004349",
+          "score": 0.369554,
+          "grade": 0,
+          "service": "bss",
+          "root_cause": "hardware",
+          "severity": "P2"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I000355",
+          "score": 0.367898,
+          "grade": 0,
+          "service": "ims",
+          "root_cause": "capacity",
+          "severity": "P1"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I004355",
+          "score": 0.354558,
+          "grade": 0,
+          "service": "ims",
+          "root_cause": "capacity",
+          "severity": "P3"
+        }
+      ],
+      "ndcg": 0.0,
+      "diagnosis": "ни одна карточка не совпала по меткам, сходство дали общие слова формулировки; в top-3 карточек с той же услугой — 0, с той же причиной — 0",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "kzn078",
+        "шт",
+        "узел"
+      ]
+    },
+    {
+      "incident_id": "I000116",
+      "query": {
+        "description": "Интеграция с CRM отдаёт 504 на host-nsk181. crm_timeout_pct держится 21 % при пороге 18 %. Операторы не могут оформить заказ. Объект CI-433785.",
+        "service": "bss",
+        "root_cause": "external_dep",
+        "severity": "P2",
+        "language": "ru",
+        "segment": "coverage_mid"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I005524",
+          "score": 0.412531,
+          "grade": 0,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P2"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I005113",
+          "score": 0.381095,
+          "grade": 0,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P3"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I005244",
+          "score": 0.378672,
+          "grade": 0,
+          "service": "platform",
+          "root_cause": "change",
+          "severity": "P3"
+        }
+      ],
+      "ndcg": 0.0,
+      "diagnosis": "ни одна карточка не совпала по меткам, сходство дали общие слова формулировки; в top-3 карточек с той же услугой — 0, с той же причиной — 0",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "21",
+        "18",
+        "держится",
+        "пороге",
+        "при"
+      ]
+    },
+    {
+      "incident_id": "I000156",
+      "query": {
+        "description": "Растёт число ожиданий на блокировках; lock_waiters 82 сессий. Часть транзакций отваливается по таймауту. CI-405632, узел host-krd006.",
+        "service": "database",
+        "root_cause": "capacity",
+        "severity": "P2",
+        "language": "ru",
+        "segment": "coverage_low"
+      },
+      "hits": [
+        {
+          "rank": 1,
+          "incident_id": "I004167",
+          "score": 0.257501,
+          "grade": 0,
+          "service": "transport",
+          "root_cause": "network",
+          "severity": "P3"
+        },
+        {
+          "rank": 2,
+          "incident_id": "I004208",
+          "score": 0.243463,
+          "grade": 0,
+          "service": "transport",
+          "root_cause": "network",
+          "severity": "P3"
+        },
+        {
+          "rank": 3,
+          "incident_id": "I002642",
+          "score": 0.225056,
+          "grade": 0,
+          "service": "transport",
+          "root_cause": "network",
+          "severity": "P3"
+        }
+      ],
+      "ndcg": 0.0,
+      "diagnosis": "ни одна карточка не совпала по меткам, сходство дали общие слова формулировки; в top-3 карточек с той же услугой — 0, с той же причиной — 0",
+      "mechanism": 3,
+      "mechanism_text": "общие слова причины и последствия весят больше названия услуги",
+      "shared_terms": [
+        "82",
+        "узел",
+        "часть"
+      ]
+    }
+  ]
+}

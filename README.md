@@ -124,6 +124,7 @@ python src/prepare_dataset.py
 python src/split_dataset.py
 python src/eda_incidents.py
 python src/prepare_features.py
+python src/triage_baseline.py run
 python -m pytest tests -q
 ```
 
@@ -131,6 +132,8 @@ python -m pytest tests -q
 и восемь графиков в `docs/lab5/figures`; файлы данных он не меняет.
 `prepare_features.py` считает словарь и IDF только по train и пишет
 `docs/lab6/features_manifest.json`, по которому видно состав признаков.
+`triage_baseline.py run` оценивает два baseline ЛР 7 и пишет отчёты в `docs/lab7`. Поиск
+по произвольному тексту: `python src/triage_baseline.py search --query "рост таймаутов Diameter"`.
 
 Подробнее: [data/README.md](data/README.md).
 
@@ -182,6 +185,9 @@ uvicorn src.api.main:app --reload
   [план пилота](docs/lab6/pilot_plan.md),
   [результаты разметки](docs/lab6/annotation_results.md),
   [обновление Data Card до 1.2](docs/lab6/data_card_update.md)
+- Лабораторная 7: [как запустить baseline и что он показал](docs/lab7/README.md),
+  [условия прогона](docs/lab7/settings.md), [таблицы метрик](docs/lab7/metrics.md),
+  [подборка удачных и проблемных ответов](docs/lab7/cases.md)
 
 ## Ограничения
 

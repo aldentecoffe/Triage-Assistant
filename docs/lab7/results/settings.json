@@ -1,0 +1,44 @@
+{
+  "baseline_version": "1.0",
+  "dataset_version": "1.1",
+  "index_split": "train",
+  "query_split": "validation",
+  "index_size": 3600,
+  "top_k": 3,
+  "text_column": "description",
+  "grading_rule": "2 — совпали service и root_cause; 1 — совпал service или root_cause; 0 — не совпало ни то, ни другое",
+  "segment_rule": "доля уникальных содержательных слов (без цифр, встречаются не более чем в половине карточек train), найденных в словаре train: 0 — unknown_all, до 50 % — coverage_low, до 80 % — coverage_mid, выше — coverage_high",
+  "metrics": {
+    "ndcg_at_k": "DCG с gain 2^оценка - 1 и дисконтом 1/log2(позиция + 1), делённый на идеальный DCG того же запроса",
+    "recall_at_k": "доля запросов, где в top-k есть хотя бы одна карточка с оценкой не ниже 1 (попадание, а не доля найденных релевантных)",
+    "full_hit_at_k": "доля запросов, где в top-k есть хотя бы одна карточка с оценкой 2",
+    "mrr_at_k": "обратная позиция первой карточки с оценкой не ниже 1, 0 если её нет в top-k",
+    "f1_macro": "среднее F1 по полному набору меток train и validation; класс без объектов получает 0"
+  },
+  "randomness": "не используется, baseline детерминирован",
+  "seed": null,
+  "tie_break": "по incident_id по возрастанию",
+  "vectorizer": {
+    "module": "src/prepare_features.py",
+    "vocabulary_size": 3799,
+    "vocabulary_sha256": "44c848662e62332db0c179052fa1b8846e3fccb10e0da4c78dcfc601f228574e",
+    "manifest_sha256": "44c848662e62332db0c179052fa1b8846e3fccb10e0da4c78dcfc601f228574e"
+  },
+  "data_sha256": {
+    "train": "d641ceb644b0a25be5a869bb1e8e97bc9b786c28b88cb0117a880a4666b071f2",
+    "validation": "73f5e83f4027c6ee44702e8a9a7541fd9c9404c9641a7991504b38fb87279079",
+    "test": "2181bbf4b9c4c3551cfac65883cd46ad7634aa841428dcf7316cade7678c3beb"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "scikit-learn": "1.9.1",
+    "pandas": "3.1.1",
+    "numpy": "2.5.5"
+  },
+  "commands": [
+    "python src/generate_incidents.py --count 6000",
+    "python src/prepare_dataset.py",
+    "python src/split_dataset.py",
+    "python src/triage_baseline.py run"
+  ]
+}

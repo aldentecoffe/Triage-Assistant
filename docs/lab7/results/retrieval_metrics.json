@@ -1,0 +1,175 @@
+{
+  "all": {
+    "queries": 1200,
+    "ndcg_at_k": 0.628841,
+    "recall_at_k": 0.731667,
+    "full_hit_at_k": 0.0,
+    "mrr_at_k": 0.674028,
+    "service_hit_at_k": 0.419167,
+    "cause_hit_at_k": 0.385833,
+    "both_labels_at_k": 0.073333,
+    "empty_results": 0
+  },
+  "by_segment": {
+    "coverage_low": {
+      "queries": 755,
+      "ndcg_at_k": 0.562278,
+      "recall_at_k": 0.684768,
+      "full_hit_at_k": 0.0,
+      "mrr_at_k": 0.611038,
+      "service_hit_at_k": 0.397351,
+      "cause_hit_at_k": 0.374834,
+      "both_labels_at_k": 0.087417,
+      "empty_results": 0
+    },
+    "coverage_mid": {
+      "queries": 445,
+      "ndcg_at_k": 0.741774,
+      "recall_at_k": 0.811236,
+      "full_hit_at_k": 0.0,
+      "mrr_at_k": 0.780899,
+      "service_hit_at_k": 0.45618,
+      "cause_hit_at_k": 0.404494,
+      "both_labels_at_k": 0.049438,
+      "empty_results": 0
+    },
+    "coverage_high": {
+      "queries": 0,
+      "ndcg_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "full_hit_at_k": 0.0,
+      "mrr_at_k": 0.0,
+      "service_hit_at_k": 0.0,
+      "cause_hit_at_k": 0.0,
+      "both_labels_at_k": 0.0,
+      "empty_results": 0
+    },
+    "unknown_all": {
+      "queries": 0,
+      "ndcg_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "full_hit_at_k": 0.0,
+      "mrr_at_k": 0.0,
+      "service_hit_at_k": 0.0,
+      "cause_hit_at_k": 0.0,
+      "both_labels_at_k": 0.0,
+      "empty_results": 0
+    }
+  },
+  "by_language": {
+    "en": {
+      "queries": 262,
+      "ndcg_at_k": 0.796153,
+      "recall_at_k": 0.812977,
+      "full_hit_at_k": 0.0,
+      "mrr_at_k": 0.807888,
+      "service_hit_at_k": 0.39313,
+      "cause_hit_at_k": 0.423664,
+      "both_labels_at_k": 0.003817,
+      "empty_results": 0
+    },
+    "ru": {
+      "queries": 938,
+      "ndcg_at_k": 0.582108,
+      "recall_at_k": 0.708955,
+      "full_hit_at_k": 0.0,
+      "mrr_at_k": 0.636638,
+      "service_hit_at_k": 0.426439,
+      "cause_hit_at_k": 0.375267,
+      "both_labels_at_k": 0.092751,
+      "empty_results": 0
+    }
+  },
+  "by_scenario": {
+    "SC-BIL-02": {
+      "queries": 171,
+      "ndcg_at_k": 0.863047,
+      "recall_at_k": 0.976608,
+      "full_hit_at_k": 0.0,
+      "mrr_at_k": 0.915205,
+      "service_hit_at_k": 0.146199,
+      "cause_hit_at_k": 0.888889,
+      "both_labels_at_k": 0.05848,
+      "empty_results": 0
+    },
+    "SC-BSS-01": {
+      "queries": 171,
+      "ndcg_at_k": 0.417525,
+      "recall_at_k": 0.508772,
+      "full_hit_at_k": 0.0,
+      "mrr_at_k": 0.473684,
+      "service_hit_at_k": 0.48538,
+      "cause_hit_at_k": 0.035088,
+      "both_labels_at_k": 0.011696,
+      "empty_results": 0
+    },
+    "SC-DB-01": {
+      "queries": 172,
+      "ndcg_at_k": 0.826588,
+      "recall_at_k": 0.930233,
+      "full_hit_at_k": 0.0,
+      "mrr_at_k": 0.860465,
+      "service_hit_at_k": 0.337209,
+      "cause_hit_at_k": 0.680233,
+      "both_labels_at_k": 0.087209,
+      "empty_results": 0
+    },
+    "SC-EXT-03": {
+      "queries": 171,
+      "ndcg_at_k": 0.589925,
+      "recall_at_k": 0.71345,
+      "full_hit_at_k": 0.0,
+      "mrr_at_k": 0.636452,
+      "service_hit_at_k": 0.251462,
+      "cause_hit_at_k": 0.690058,
+      "both_labels_at_k": 0.22807,
+      "empty_results": 0
+    },
+    "SC-IMS-03": {
+      "queries": 171,
+      "ndcg_at_k": 0.756771,
+      "recall_at_k": 0.836257,
+      "full_hit_at_k": 0.0,
+      "mrr_at_k": 0.794347,
+      "service_hit_at_k": 0.824561,
+      "cause_hit_at_k": 0.064327,
+      "both_labels_at_k": 0.052632,
+      "empty_results": 0
+    },
+    "SC-PLT-03": {
+      "queries": 172,
+      "ndcg_at_k": 0.407756,
+      "recall_at_k": 0.465116,
+      "full_hit_at_k": 0.0,
+      "mrr_at_k": 0.426357,
+      "service_hit_at_k": 0.325581,
+      "cause_hit_at_k": 0.145349,
+      "both_labels_at_k": 0.005814,
+      "empty_results": 0
+    },
+    "SC-TRN-03": {
+      "queries": 172,
+      "ndcg_at_k": 0.540925,
+      "recall_at_k": 0.69186,
+      "full_hit_at_k": 0.0,
+      "mrr_at_k": 0.612403,
+      "service_hit_at_k": 0.563953,
+      "cause_hit_at_k": 0.197674,
+      "both_labels_at_k": 0.069767,
+      "empty_results": 0
+    }
+  },
+  "coverage": {
+    "min": 0.153846,
+    "median": 0.5,
+    "max": 0.666667,
+    "fully_known_queries": 0
+  },
+  "structure": {
+    "index_service_cause_pairs": 14,
+    "query_service_cause_pairs": 7,
+    "shared_service_cause_pairs": 0,
+    "grade_two_reachable": false,
+    "note": "если общих пар нет, полностью релевантных кандидатов в индексе не существует и идеальная выдача состоит из карточек с оценкой 1"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "severity": {
+    "majority_class": "P3",
+    "train_share": 0.483056,
+    "accuracy": 0.368333,
+    "f1_macro": 0.134592,
+    "recall_per_class": {
+      "P1": 0.0,
+      "P2": 0.0,
+      "P3": 1.0,
+      "P4": 0.0
+    },
+    "support": {
+      "P1": 96,
+      "P2": 559,
+      "P3": 442,
+      "P4": 103
+    },
+    "distinct_classes": 4,
+    "labels": [
+      "P1",
+      "P2",
+      "P3",
+      "P4"
+    ]
+  },
+  "service": {
+    "majority_class": "transport",
+    "train_share": 0.143333,
+    "accuracy": 0.143333,
+    "f1_macro": 0.035818,
+    "recall_per_class": {
+      "billing": 0.0,
+      "bss": 0.0,
+      "database": 0.0,
+      "external": 0.0,
+      "ims": 0.0,
+      "platform": 0.0,
+      "transport": 1.0
+    },
+    "support": {
+      "billing": 171,
+      "bss": 171,
+      "database": 172,
+      "external": 171,
+      "ims": 171,
+      "platform": 172,
+      "transport": 172
+    },
+    "distinct_classes": 7,
+    "labels": [
+      "billing",
+      "bss",
+      "database",
+      "external",
+      "ims",
+      "platform",
+      "transport"
+    ]
+  },
+  "root_cause": {
+    "majority_class": "capacity",
+    "train_share": 0.428611,
+    "accuracy": 0.143333,
+    "f1_macro": 0.041788,
+    "recall_per_class": {
+      "capacity": 1.0,
+      "change": 0.0,
+      "external_dep": 0.0,
+      "hardware": 0.0,
+      "network": 0.0,
+      "software": 0.0
+    },
+    "support": {
+      "capacity": 172,
+      "change": 342,
+      "external_dep": 171,
+      "hardware": 172,
+      "network": 0,
+      "software": 343
+    },
+    "distinct_classes": 6,
+    "labels": [
+      "capacity",
+      "change",
+      "external_dep",
+      "hardware",
+      "network",
+      "software"
+    ]
+  }
+}
