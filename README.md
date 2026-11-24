@@ -19,7 +19,10 @@ Wine Quality. Лабораторная 4 — данные проекта: рее
 и частотный классификатор по трём выходам. Лабораторная 8 — метрики и анализ ошибок:
 шкала релевантности v2.0 (NDCG@3 0,413 по другой шкале, чем 0,629 в работе 7 — числа не сравнимы,
 см. [спецификацию](docs/lab8/metric_spec.md)), разрезы по сегментам, таксономия ошибок и гипотеза
-для следующей работы. HTTP-сервис появится в следующих лабораторных.
+для следующей работы. Лабораторная 9 — контролируемый эксперимент: переранжирование пула top-10
+по вероятности причины дало +0,067 к NDCG@3 вместо заданных 0,10 и обнулило попадание причины
+в top-3 у P1, поэтому изменение не включено; отчёт — [docs/lab9](docs/lab9/README.md).
+HTTP-сервис появится в следующих лабораторных.
 
 ## Учебные ноутбуки
 
@@ -138,6 +141,8 @@ python -m pytest tests -q
 `docs/lab6/features_manifest.json`, по которому видно состав признаков.
 `triage_baseline.py run` оценивает два baseline ЛР 7 и пишет отчёты в `docs/lab7`. Поиск
 по произвольному тексту: `python src/triage_baseline.py search --query "рост таймаутов Diameter"`.
+`experiment.py run` проверяет гипотезу ЛР 9 на validation, `freeze` фиксирует решение по заранее
+заданным условиям, `test` считает контроль на test и без `freeze` не запускается.
 
 Подробнее: [data/README.md](data/README.md).
 
@@ -182,9 +187,10 @@ python src/split_dataset.py
 python src/prepare_features.py
 python src/triage_baseline.py run
 python src/eval_report.py run
+python src/experiment.py run
 ```
 
-Полные условия, метрики и оговорки — в документации работ 7 и 8 ниже.
+Полные условия, метрики и оговорки — в документации работ 7–9 ниже.
 
 ## Документация
 
@@ -207,6 +213,11 @@ python src/eval_report.py run
   [спецификация метрик](docs/lab8/metric_spec.md), [разрезы baseline](docs/lab8/segments.md),
   [таксономия ошибок](docs/lab8/error_taxonomy.md), [ручной расчёт](docs/lab8/manual_calculation.md),
   [связь с ценностью](docs/lab8/value_link.md), [гипотеза для работы 9](docs/lab8/hypothesis.md)
+- Лабораторная 9: [как устроен эксперимент и что он показал](docs/lab9/README.md),
+  [карточка гипотезы и конфигурация](docs/lab9/experiment_plan.md),
+  [журнал запуска](docs/lab9/experiment_log.md),
+  [сравнительная таблица](docs/lab9/comparison.md),
+  [интерпретация и решение](docs/lab9/decision.md)
 
 ## Ограничения
 

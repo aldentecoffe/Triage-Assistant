@@ -1,0 +1,36 @@
+{
+  "experiment_id": "E01",
+  "version": "1.0",
+  "date": "2026-11-24",
+  "decision": "reject",
+  "reason": "прирост 0,067 меньше заданных 0,10, и попадание причины в top-3 у P1 обнулилось",
+  "checks": {
+    "gain": false,
+    "p1_cause": false,
+    "p1_ndcg": true,
+    "empty": true,
+    "spread": true
+  },
+  "rules": {
+    "alpha_margin": 0.1,
+    "alpha_rule": "baseline NDCG@3 + 0,10",
+    "alpha": 0.513059,
+    "protective": {
+      "rule": "причина в top-3 у P1 и NDCG@3 у P1 не ниже baseline; пустых выдач 0",
+      "p1_queries": 96,
+      "p1_cause_hit_base": 0.0625,
+      "p1_cause_hit_cand": 0.0,
+      "p1_ndcg_base": 0.271434,
+      "p1_ndcg_cand": 0.271861,
+      "empty_base": 0,
+      "empty_cand": 0
+    },
+    "spread_limit": 0.5
+  },
+  "dominant_scenario": "SC-EXT-03",
+  "dominant_share": 0.261411,
+  "baseline_ndcg": 0.413059,
+  "candidate_ndcg": 0.480164,
+  "delta_ndcg": 0.067105,
+  "summary_sha256": "8df8c372cca1c6ae8d1e6f61f077308e27c18ac882c708a3dc8bfac9a730cd9e"
+}

@@ -1,0 +1,249 @@
+{
+  "queries": 1200,
+  "scored_queries": 1200,
+  "excluded": 0,
+  "baseline": {
+    "ndcg@3": 0.413059,
+    "recall@3": 0.731667,
+    "cause_hit@3": 0.385833,
+    "service_hit@3": 0.419167
+  },
+  "candidate": {
+    "ndcg@3": 0.480164,
+    "recall@3": 0.735,
+    "cause_hit@3": 0.421667,
+    "service_hit@3": 0.36
+  },
+  "delta": {
+    "ndcg@3": 0.067105,
+    "recall@3": 0.003333,
+    "cause_hit@3": 0.035834,
+    "service_hit@3": -0.059167
+  },
+  "protective": {
+    "rule": "причина в top-3 у P1 и NDCG@3 у P1 не ниже baseline; пустых выдач 0",
+    "p1_queries": 96,
+    "p1_cause_hit_base": 0.0625,
+    "p1_cause_hit_cand": 0.0,
+    "p1_ndcg_base": 0.271434,
+    "p1_ndcg_cand": 0.271861,
+    "empty_base": 0,
+    "empty_cand": 0
+  },
+  "reranker": {
+    "params": {
+      "model": "LogisticRegression",
+      "solver": "lbfgs",
+      "C": 1.0,
+      "max_iter": 2000,
+      "class_weight": "balanced"
+    },
+    "accuracy": 0.369167,
+    "by_cause": [
+      {
+        "cause": "capacity",
+        "queries": 172,
+        "accuracy": 1.0,
+        "ndcg_base": 0.673888,
+        "ndcg_cand": 0.781993,
+        "delta": 0.108105,
+        "contribution": 0.015495
+      },
+      {
+        "cause": "change",
+        "queries": 342,
+        "accuracy": 0.532164,
+        "ndcg_base": 0.669455,
+        "ndcg_cand": 0.767367,
+        "delta": 0.097912,
+        "contribution": 0.027905
+      },
+      {
+        "cause": "external_dep",
+        "queries": 171,
+        "accuracy": 0.0,
+        "ndcg_base": 0.146972,
+        "ndcg_cand": 0.164516,
+        "delta": 0.017544,
+        "contribution": 0.0025
+      },
+      {
+        "cause": "hardware",
+        "queries": 172,
+        "accuracy": 0.325581,
+        "ndcg_base": 0.24319,
+        "ndcg_cand": 0.304361,
+        "delta": 0.061171,
+        "contribution": 0.008768
+      },
+      {
+        "cause": "software",
+        "queries": 343,
+        "accuracy": 0.09621,
+        "ndcg_base": 0.244453,
+        "ndcg_cand": 0.287967,
+        "delta": 0.043514,
+        "contribution": 0.012438
+      }
+    ],
+    "predicted": {
+      "capacity": 862,
+      "change": 183,
+      "hardware": 107,
+      "software": 48
+    },
+    "saturated_cause": "capacity",
+    "saturated_queries": 862,
+    "saturated_share": 0.718333,
+    "saturated_gain_share": 0.230907
+  },
+  "changed_queries": 457,
+  "improved_queries": 263,
+  "worsened_queries": 91,
+  "config": {
+    "experiment_id": "E01",
+    "version": "1.0",
+    "baseline": {
+      "name": "tfidf_cosine_top3",
+      "pool": null,
+      "reranker": null
+    },
+    "candidate": {
+      "name": "tfidf_cosine_pool10_cause_rerank",
+      "pool": 10,
+      "reranker": {
+        "model": "LogisticRegression",
+        "solver": "lbfgs",
+        "C": 1.0,
+        "max_iter": 2000,
+        "class_weight": "balanced"
+      }
+    },
+    "k": 3,
+    "main_metric": "ndcg@3 по шкале v2.0",
+    "grading_rule": "2 — та же причина; 1 — та же услуга при другой причине; 0 — иначе",
+    "selection_split": "validation",
+    "final_split": "test",
+    "data_version": "1.1",
+    "vectorizer": {
+      "analyzer": "word",
+      "lowercase": true,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "min_df": 2,
+      "max_features": 20000,
+      "sublinear_tf": true
+    },
+    "seed": null,
+    "alpha_rule": "baseline NDCG@3 + 0,10",
+    "spread_limit": 0.5
+  },
+  "config_sha256": "1bc65b563b8aab289759f078e58fef7afec2cc66f3ffcde1239e33052f24152e",
+  "hashes": {
+    "train": "d641ceb644b0a25be5a869bb1e8e97bc9b786c28b88cb0117a880a4666b071f2",
+    "validation": "73f5e83f4027c6ee44702e8a9a7541fd9c9404c9641a7991504b38fb87279079"
+  },
+  "vocabulary_sha256": "44c848662e62332db0c179052fa1b8846e3fccb10e0da4c78dcfc601f228574e",
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "scikit_learn": "1.9.1",
+    "pandas": "3.1.1",
+    "numpy": "2.5.5"
+  },
+  "reproduction": {
+    "reference": "docs\\lab8\\results\\summary.json",
+    "checked": true,
+    "ndcg_lab8": 0.413059,
+    "ndcg_now": 0.413059,
+    "difference": 0.0,
+    "match": true,
+    "ceiling": {
+      "top_3": 0.433467,
+      "top_10": 0.544296,
+      "top_25": 0.616395,
+      "top_50": 0.660456
+    }
+  },
+  "decision_checks": {
+    "rules": {
+      "alpha_margin": 0.1,
+      "alpha_rule": "baseline NDCG@3 + 0,10",
+      "alpha": 0.513059,
+      "protective": {
+        "rule": "причина в top-3 у P1 и NDCG@3 у P1 не ниже baseline; пустых выдач 0",
+        "p1_queries": 96,
+        "p1_cause_hit_base": 0.0625,
+        "p1_cause_hit_cand": 0.0,
+        "p1_ndcg_base": 0.271434,
+        "p1_ndcg_cand": 0.271861,
+        "empty_base": 0,
+        "empty_cand": 0
+      },
+      "spread_limit": 0.5
+    },
+    "checks": {
+      "gain": false,
+      "p1_cause": false,
+      "p1_ndcg": true,
+      "empty": true,
+      "spread": true
+    },
+    "delta": 0.067105,
+    "dominant_scenario": "SC-EXT-03",
+    "dominant_contribution": 0.017542,
+    "dominant_share": 0.261411,
+    "scenario_contributions": {
+      "SC-BIL-02": 0.010363,
+      "SC-BSS-01": 0.0025,
+      "SC-DB-01": 0.015495,
+      "SC-EXT-03": 0.017542,
+      "SC-IMS-03": 0.000315,
+      "SC-PLT-03": 0.012123,
+      "SC-TRN-03": 0.008768
+    }
+  },
+  "uncovered": {
+    "causes": [
+      "capacity",
+      "change",
+      "external_dep",
+      "hardware",
+      "software"
+    ],
+    "missing_causes": [
+      "network"
+    ],
+    "scenarios": 7,
+    "scenarios_list": [
+      "SC-BIL-02",
+      "SC-BSS-01",
+      "SC-DB-01",
+      "SC-EXT-03",
+      "SC-IMS-03",
+      "SC-PLT-03",
+      "SC-TRN-03"
+    ],
+    "p1_scenarios": [
+      "SC-IMS-03"
+    ],
+    "languages": {
+      "ru": 938,
+      "en": 262
+    },
+    "no_relevant": 0,
+    "total_causes_in_taxonomy": 6,
+    "train_causes_known": true
+  },
+  "train_cause_share": {
+    "capacity": 0.428611,
+    "hardware": 0.214167,
+    "change": 0.142778,
+    "network": 0.071667,
+    "software": 0.071389,
+    "external_dep": 0.071389
+  },
+  "run_date": "2026-11-24"
+}

@@ -1,0 +1,194 @@
+{
+  "queries": 1200,
+  "scored_queries": 1200,
+  "excluded": 0,
+  "baseline": {
+    "ndcg@3": 0.32457,
+    "recall@3": 0.59,
+    "cause_hit@3": 0.374167,
+    "service_hit@3": 0.325833
+  },
+  "candidate": {
+    "ndcg@3": 0.316727,
+    "recall@3": 0.596667,
+    "cause_hit@3": 0.2975,
+    "service_hit@3": 0.381667
+  },
+  "delta": {
+    "ndcg@3": -0.007843,
+    "recall@3": 0.006667,
+    "cause_hit@3": -0.076667,
+    "service_hit@3": 0.055834
+  },
+  "protective": {
+    "rule": "причина в top-3 у P1 и NDCG@3 у P1 не ниже baseline; пустых выдач 0",
+    "p1_queries": 171,
+    "p1_cause_hit_base": 0.438596,
+    "p1_cause_hit_cand": 0.409357,
+    "p1_ndcg_base": 0.380749,
+    "p1_ndcg_cand": 0.361201,
+    "empty_base": 0,
+    "empty_cand": 0
+  },
+  "reranker": {
+    "params": {
+      "model": "LogisticRegression",
+      "solver": "lbfgs",
+      "C": 1.0,
+      "max_iter": 2000,
+      "class_weight": "balanced"
+    },
+    "accuracy": 0.205833,
+    "by_cause": [
+      {
+        "cause": "capacity",
+        "queries": 171,
+        "accuracy": 0.719298,
+        "ndcg_base": 0.292616,
+        "ndcg_cand": 0.377841,
+        "delta": 0.085225,
+        "contribution": 0.012145
+      },
+      {
+        "cause": "change",
+        "queries": 171,
+        "accuracy": 0.116959,
+        "ndcg_base": 0.574548,
+        "ndcg_cand": 0.480665,
+        "delta": -0.093883,
+        "contribution": -0.013378
+      },
+      {
+        "cause": "external_dep",
+        "queries": 342,
+        "accuracy": 0.01462,
+        "ndcg_base": 0.342699,
+        "ndcg_cand": 0.310628,
+        "delta": -0.032071,
+        "contribution": -0.00914
+      },
+      {
+        "cause": "hardware",
+        "queries": 172,
+        "accuracy": 0.575581,
+        "ndcg_base": 0.437172,
+        "ndcg_cand": 0.563888,
+        "delta": 0.126716,
+        "contribution": 0.018163
+      },
+      {
+        "cause": "network",
+        "queries": 172,
+        "accuracy": 0.0,
+        "ndcg_base": 0.026753,
+        "ndcg_cand": 0.018806,
+        "delta": -0.007947,
+        "contribution": -0.001139
+      },
+      {
+        "cause": "software",
+        "queries": 172,
+        "accuracy": 0.0,
+        "ndcg_base": 0.256983,
+        "ndcg_cand": 0.155872,
+        "delta": -0.101111,
+        "contribution": -0.014493
+      }
+    ],
+    "predicted": {
+      "capacity": 888,
+      "hardware": 284,
+      "change": 23,
+      "external_dep": 5
+    },
+    "saturated_cause": "capacity",
+    "saturated_queries": 888,
+    "saturated_share": 0.74,
+    "saturated_gain_share": null
+  },
+  "changed_queries": 554,
+  "improved_queries": 202,
+  "worsened_queries": 177,
+  "config": {
+    "experiment_id": "E01",
+    "version": "1.0",
+    "baseline": {
+      "name": "tfidf_cosine_top3",
+      "pool": null,
+      "reranker": null
+    },
+    "candidate": {
+      "name": "tfidf_cosine_pool10_cause_rerank",
+      "pool": 10,
+      "reranker": {
+        "model": "LogisticRegression",
+        "solver": "lbfgs",
+        "C": 1.0,
+        "max_iter": 2000,
+        "class_weight": "balanced"
+      }
+    },
+    "k": 3,
+    "main_metric": "ndcg@3 по шкале v2.0",
+    "grading_rule": "2 — та же причина; 1 — та же услуга при другой причине; 0 — иначе",
+    "selection_split": "validation",
+    "final_split": "test",
+    "data_version": "1.1",
+    "vectorizer": {
+      "analyzer": "word",
+      "lowercase": true,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "min_df": 2,
+      "max_features": 20000,
+      "sublinear_tf": true
+    },
+    "seed": null,
+    "alpha_rule": "baseline NDCG@3 + 0,10",
+    "spread_limit": 0.5
+  },
+  "config_sha256": "1bc65b563b8aab289759f078e58fef7afec2cc66f3ffcde1239e33052f24152e",
+  "hashes": {
+    "test": "2181bbf4b9c4c3551cfac65883cd46ad7634aa841428dcf7316cade7678c3beb"
+  },
+  "vocabulary_sha256": "44c848662e62332db0c179052fa1b8846e3fccb10e0da4c78dcfc601f228574e",
+  "run_date": "2026-11-24",
+  "decision": {
+    "experiment_id": "E01",
+    "version": "1.0",
+    "date": "2026-11-24",
+    "decision": "reject",
+    "reason": "прирост 0,067 меньше заданных 0,10, и попадание причины в top-3 у P1 обнулилось",
+    "checks": {
+      "gain": false,
+      "p1_cause": false,
+      "p1_ndcg": true,
+      "empty": true,
+      "spread": true
+    },
+    "rules": {
+      "alpha_margin": 0.1,
+      "alpha_rule": "baseline NDCG@3 + 0,10",
+      "alpha": 0.513059,
+      "protective": {
+        "rule": "причина в top-3 у P1 и NDCG@3 у P1 не ниже baseline; пустых выдач 0",
+        "p1_queries": 96,
+        "p1_cause_hit_base": 0.0625,
+        "p1_cause_hit_cand": 0.0,
+        "p1_ndcg_base": 0.271434,
+        "p1_ndcg_cand": 0.271861,
+        "empty_base": 0,
+        "empty_cand": 0
+      },
+      "spread_limit": 0.5
+    },
+    "dominant_scenario": "SC-EXT-03",
+    "dominant_share": 0.261411,
+    "baseline_ndcg": 0.413059,
+    "candidate_ndcg": 0.480164,
+    "delta_ndcg": 0.067105,
+    "summary_sha256": "8df8c372cca1c6ae8d1e6f61f077308e27c18ac882c708a3dc8bfac9a730cd9e"
+  }
+}

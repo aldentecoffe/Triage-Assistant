@@ -33,3 +33,4 @@ AGENTS.md
 .opencode/
 .agents/
 skills-lock.json
+docs/lab9/results/*.previous.*

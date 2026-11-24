@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "experiment_id": "E01",
+  "selection_split": "validation",
+  "queries": 1200,
+  "baseline": 0.413059,
+  "candidate": 0.480164,
+  "signals": {
+    "logreg_balanced": 0.480164,
+    "logreg_plain": 0.461345,
+    "complement_nb": 0.474547,
+    "cause_centroid": 0.470545
+  },
+  "alpha": 0.513059,
+  "note": "замер сигналов сделан на validation до фиксации конфигурации; test не использовался",
+  "matches_run": true
+}

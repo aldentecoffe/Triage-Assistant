@@ -1,0 +1,40 @@
+{
+  "experiment_id": "E01",
+  "version": "1.0",
+  "baseline": {
+    "name": "tfidf_cosine_top3",
+    "pool": null,
+    "reranker": null
+  },
+  "candidate": {
+    "name": "tfidf_cosine_pool10_cause_rerank",
+    "pool": 10,
+    "reranker": {
+      "model": "LogisticRegression",
+      "solver": "lbfgs",
+      "C": 1.0,
+      "max_iter": 2000,
+      "class_weight": "balanced"
+    }
+  },
+  "k": 3,
+  "main_metric": "ndcg@3 по шкале v2.0",
+  "grading_rule": "2 — та же причина; 1 — та же услуга при другой причине; 0 — иначе",
+  "selection_split": "validation",
+  "final_split": "test",
+  "data_version": "1.1",
+  "vectorizer": {
+    "analyzer": "word",
+    "lowercase": true,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 2,
+    "max_features": 20000,
+    "sublinear_tf": true
+  },
+  "seed": null,
+  "alpha_rule": "baseline NDCG@3 + 0,10",
+  "spread_limit": 0.5
+}
