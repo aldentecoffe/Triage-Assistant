@@ -1,0 +1,461 @@
+{
+  "version": "1.0",
+  "data_version": "1.1",
+  "splits_used": [
+    "train"
+  ],
+  "test_used": false,
+  "validation_used": "только средняя близость текстов, метки не используются",
+  "scheme": "leave-one-scenario-out по train",
+  "cards": 3600,
+  "folds": 14,
+  "per_fold": [
+    {
+      "scenario_id": "SC-BIL-01",
+      "service": "billing",
+      "cards": 257,
+      "index_cards": 3343,
+      "metrics": {
+        "ndcg@3": 0.50312,
+        "service_hit@3": 0.428016,
+        "cause_hit@3": 0.533074,
+        "vote_accuracy_service": 0.330739,
+        "vote_accuracy_cause": 0.40856,
+        "clf_accuracy_service": 0.326848,
+        "clf_accuracy_cause": 0.953307,
+        "clf_accuracy_severity": 0.692607,
+        "rule_coverage": 1.0,
+        "rule_accuracy": 1.0,
+        "hybrid_accuracy_severity": 1.0,
+        "same_service_max_cosine": 0.192178
+      }
+    },
+    {
+      "scenario_id": "SC-BIL-04",
+      "service": "billing",
+      "cards": 257,
+      "index_cards": 3343,
+      "metrics": {
+        "ndcg@3": 0.110297,
+        "service_hit@3": 0.155642,
+        "cause_hit@3": 0.0,
+        "vote_accuracy_service": 0.105058,
+        "vote_accuracy_cause": 0.0,
+        "clf_accuracy_service": 0.175097,
+        "clf_accuracy_cause": 0.0,
+        "clf_accuracy_severity": 0.684825,
+        "rule_coverage": 1.0,
+        "rule_accuracy": 1.0,
+        "hybrid_accuracy_severity": 1.0,
+        "same_service_max_cosine": 0.200041
+      }
+    },
+    {
+      "scenario_id": "SC-BSS-02",
+      "service": "bss",
+      "cards": 257,
+      "index_cards": 3343,
+      "metrics": {
+        "ndcg@3": 0.19664,
+        "service_hit@3": 0.357977,
+        "cause_hit@3": 0.194553,
+        "vote_accuracy_service": 0.190661,
+        "vote_accuracy_cause": 0.116732,
+        "clf_accuracy_service": 0.046693,
+        "clf_accuracy_cause": 0.789883,
+        "clf_accuracy_severity": 1.0,
+        "rule_coverage": 1.0,
+        "rule_accuracy": 1.0,
+        "hybrid_accuracy_severity": 1.0,
+        "same_service_max_cosine": 0.221345
+      }
+    },
+    {
+      "scenario_id": "SC-BSS-04",
+      "service": "bss",
+      "cards": 257,
+      "index_cards": 3343,
+      "metrics": {
+        "ndcg@3": 0.486352,
+        "service_hit@3": 0.252918,
+        "cause_hit@3": 0.564202,
+        "vote_accuracy_service": 0.163424,
+        "vote_accuracy_cause": 0.447471,
+        "clf_accuracy_service": 0.101167,
+        "clf_accuracy_cause": 0.027237,
+        "clf_accuracy_severity": 0.789883,
+        "rule_coverage": 1.0,
+        "rule_accuracy": 1.0,
+        "hybrid_accuracy_severity": 1.0,
+        "same_service_max_cosine": 0.211328
+      }
+    },
+    {
+      "scenario_id": "SC-DB-02",
+      "service": "database",
+      "cards": 257,
+      "index_cards": 3343,
+      "metrics": {
+        "ndcg@3": 0.326508,
+        "service_hit@3": 0.058366,
+        "cause_hit@3": 0.40856,
+        "vote_accuracy_service": 0.011673,
+        "vote_accuracy_cause": 0.319066,
+        "clf_accuracy_service": 0.0,
+        "clf_accuracy_cause": 0.0,
+        "clf_accuracy_severity": 0.36965,
+        "rule_coverage": 1.0,
+        "rule_accuracy": 1.0,
+        "hybrid_accuracy_severity": 1.0,
+        "same_service_max_cosine": 0.142325
+      }
+    },
+    {
+      "scenario_id": "SC-DB-04",
+      "service": "database",
+      "cards": 257,
+      "index_cards": 3343,
+      "metrics": {
+        "ndcg@3": 0.022368,
+        "service_hit@3": 0.050584,
+        "cause_hit@3": 0.038911,
+        "vote_accuracy_service": 0.011673,
+        "vote_accuracy_cause": 0.015564,
+        "clf_accuracy_service": 0.0,
+        "clf_accuracy_cause": 0.0,
+        "clf_accuracy_severity": 0.735409,
+        "rule_coverage": 1.0,
+        "rule_accuracy": 1.0,
+        "hybrid_accuracy_severity": 1.0,
+        "same_service_max_cosine": 0.115017
+      }
+    },
+    {
+      "scenario_id": "SC-EXT-01",
+      "service": "external",
+      "cards": 257,
+      "index_cards": 3343,
+      "metrics": {
+        "ndcg@3": 0.00663,
+        "service_hit@3": 0.019455,
+        "cause_hit@3": 0.0,
+        "vote_accuracy_service": 0.007782,
+        "vote_accuracy_cause": 0.0,
+        "clf_accuracy_service": 0.0,
+        "clf_accuracy_cause": 0.0,
+        "clf_accuracy_severity": 0.287938,
+        "rule_coverage": 1.0,
+        "rule_accuracy": 1.0,
+        "hybrid_accuracy_severity": 1.0,
+        "same_service_max_cosine": 0.105042
+      }
+    },
+    {
+      "scenario_id": "SC-EXT-02",
+      "service": "external",
+      "cards": 257,
+      "index_cards": 3343,
+      "metrics": {
+        "ndcg@3": 0.450551,
+        "service_hit@3": 0.058366,
+        "cause_hit@3": 0.669261,
+        "vote_accuracy_service": 0.011673,
+        "vote_accuracy_cause": 0.424125,
+        "clf_accuracy_service": 0.0,
+        "clf_accuracy_cause": 0.848249,
+        "clf_accuracy_severity": 0.801556,
+        "rule_coverage": 1.0,
+        "rule_accuracy": 1.0,
+        "hybrid_accuracy_severity": 1.0,
+        "same_service_max_cosine": 0.090445
+      }
+    },
+    {
+      "scenario_id": "SC-IMS-01",
+      "service": "ims",
+      "cards": 257,
+      "index_cards": 3343,
+      "metrics": {
+        "ndcg@3": 0.755864,
+        "service_hit@3": 0.225681,
+        "cause_hit@3": 0.785992,
+        "vote_accuracy_service": 0.198444,
+        "vote_accuracy_cause": 0.719844,
+        "clf_accuracy_service": 0.0,
+        "clf_accuracy_cause": 0.976654,
+        "clf_accuracy_severity": 0.416342,
+        "rule_coverage": 1.0,
+        "rule_accuracy": 1.0,
+        "hybrid_accuracy_severity": 1.0,
+        "same_service_max_cosine": 0.181804
+      }
+    },
+    {
+      "scenario_id": "SC-IMS-02",
+      "service": "ims",
+      "cards": 257,
+      "index_cards": 3343,
+      "metrics": {
+        "ndcg@3": 0.503199,
+        "service_hit@3": 0.07393,
+        "cause_hit@3": 0.575875,
+        "vote_accuracy_service": 0.062257,
+        "vote_accuracy_cause": 0.490272,
+        "clf_accuracy_service": 0.0,
+        "clf_accuracy_cause": 0.151751,
+        "clf_accuracy_severity": 0.785992,
+        "rule_coverage": 1.0,
+        "rule_accuracy": 1.0,
+        "hybrid_accuracy_severity": 1.0,
+        "same_service_max_cosine": 0.167444
+      }
+    },
+    {
+      "scenario_id": "SC-PLT-02",
+      "service": "platform",
+      "cards": 257,
+      "index_cards": 3343,
+      "metrics": {
+        "ndcg@3": 0.452152,
+        "service_hit@3": 0.023346,
+        "cause_hit@3": 0.536965,
+        "vote_accuracy_service": 0.0,
+        "vote_accuracy_cause": 0.463035,
+        "clf_accuracy_service": 0.0,
+        "clf_accuracy_cause": 0.840467,
+        "clf_accuracy_severity": 0.385214,
+        "rule_coverage": 1.0,
+        "rule_accuracy": 1.0,
+        "hybrid_accuracy_severity": 1.0,
+        "same_service_max_cosine": 0.112844
+      }
+    },
+    {
+      "scenario_id": "SC-PLT-04",
+      "service": "platform",
+      "cards": 257,
+      "index_cards": 3343,
+      "metrics": {
+        "ndcg@3": 0.057612,
+        "service_hit@3": 0.007782,
+        "cause_hit@3": 0.089494,
+        "vote_accuracy_service": 0.003891,
+        "vote_accuracy_cause": 0.050584,
+        "clf_accuracy_service": 0.0,
+        "clf_accuracy_cause": 0.0,
+        "clf_accuracy_severity": 0.789883,
+        "rule_coverage": 1.0,
+        "rule_accuracy": 1.0,
+        "hybrid_accuracy_severity": 1.0,
+        "same_service_max_cosine": 0.108431
+      }
+    },
+    {
+      "scenario_id": "SC-TRN-01",
+      "service": "transport",
+      "cards": 258,
+      "index_cards": 3342,
+      "metrics": {
+        "ndcg@3": 0.0846,
+        "service_hit@3": 0.096899,
+        "cause_hit@3": 0.0,
+        "vote_accuracy_service": 0.085271,
+        "vote_accuracy_cause": 0.0,
+        "clf_accuracy_service": 0.0,
+        "clf_accuracy_cause": 0.0,
+        "clf_accuracy_severity": 0.732558,
+        "rule_coverage": 1.0,
+        "rule_accuracy": 1.0,
+        "hybrid_accuracy_severity": 1.0,
+        "same_service_max_cosine": 0.176468
+      }
+    },
+    {
+      "scenario_id": "SC-TRN-02",
+      "service": "transport",
+      "cards": 258,
+      "index_cards": 3342,
+      "metrics": {
+        "ndcg@3": 0.245384,
+        "service_hit@3": 0.147287,
+        "cause_hit@3": 0.341085,
+        "vote_accuracy_service": 0.120155,
+        "vote_accuracy_cause": 0.248062,
+        "clf_accuracy_service": 0.073643,
+        "clf_accuracy_cause": 0.713178,
+        "clf_accuracy_severity": 0.108527,
+        "rule_coverage": 1.0,
+        "rule_accuracy": 1.0,
+        "hybrid_accuracy_severity": 1.0,
+        "same_service_max_cosine": 0.175362
+      }
+    }
+  ],
+  "fold_summary": {
+    "ndcg@3": {
+      "mean": 0.300091,
+      "std": 0.23031,
+      "min": 0.00663,
+      "max": 0.755864,
+      "folds": 14
+    },
+    "service_hit@3": {
+      "mean": 0.139732,
+      "std": 0.131273,
+      "min": 0.007782,
+      "max": 0.428016,
+      "folds": 14
+    },
+    "cause_hit@3": {
+      "mean": 0.338427,
+      "std": 0.279468,
+      "min": 0.0,
+      "max": 0.785992,
+      "folds": 14
+    },
+    "vote_accuracy_service": {
+      "mean": 0.09305,
+      "std": 0.099118,
+      "min": 0.0,
+      "max": 0.330739,
+      "folds": 14
+    },
+    "vote_accuracy_cause": {
+      "mean": 0.264523,
+      "std": 0.235361,
+      "min": 0.0,
+      "max": 0.719844,
+      "folds": 14
+    },
+    "clf_accuracy_service": {
+      "mean": 0.051675,
+      "std": 0.09525,
+      "min": 0.0,
+      "max": 0.326848,
+      "folds": 14
+    },
+    "clf_accuracy_cause": {
+      "mean": 0.378623,
+      "std": 0.433047,
+      "min": 0.0,
+      "max": 0.976654,
+      "folds": 14
+    },
+    "clf_accuracy_severity": {
+      "mean": 0.612885,
+      "std": 0.252455,
+      "min": 0.108527,
+      "max": 1.0,
+      "folds": 14
+    },
+    "rule_coverage": {
+      "mean": 1.0,
+      "std": 0.0,
+      "min": 1.0,
+      "max": 1.0,
+      "folds": 14
+    },
+    "rule_accuracy": {
+      "mean": 1.0,
+      "std": 0.0,
+      "min": 1.0,
+      "max": 1.0,
+      "folds": 14
+    },
+    "hybrid_accuracy_severity": {
+      "mean": 1.0,
+      "std": 0.0,
+      "min": 1.0,
+      "max": 1.0,
+      "folds": 14
+    },
+    "same_service_max_cosine": {
+      "mean": 0.157148,
+      "std": 0.043886,
+      "min": 0.090445,
+      "max": 0.221345,
+      "folds": 14
+    }
+  },
+  "pooled": {
+    "vote_severity_f1": 0.33925,
+    "clf_severity_f1": 0.438679,
+    "clf_p1_recall": 0.0,
+    "vote_service_f1": 0.08738,
+    "clf_service_f1": 0.05002,
+    "vote_cause_f1": 0.136604,
+    "clf_cause_f1": 0.111114
+  },
+  "reference": {
+    "vote_service_f1": 0.301274,
+    "vote_cause_f1": 0.204559,
+    "clf_service_f1": 0.280969,
+    "clf_cause_f1": 0.266042,
+    "clf_severity_f1": 0.249427,
+    "clf_p1_recall": 0.0,
+    "rule_coverage": 1.0,
+    "ndcg@3": 0.413059,
+    "service_hit@3": 0.419167,
+    "cause_hit@3": 0.385833
+  },
+  "comparison": {
+    "vote_service_f1": {
+      "pooled": 0.08738,
+      "validation": 0.301274,
+      "delta": -0.213894
+    },
+    "vote_cause_f1": {
+      "pooled": 0.136604,
+      "validation": 0.204559,
+      "delta": -0.067955
+    },
+    "clf_service_f1": {
+      "pooled": 0.05002,
+      "validation": 0.280969,
+      "delta": -0.230949
+    },
+    "clf_cause_f1": {
+      "pooled": 0.111114,
+      "validation": 0.266042,
+      "delta": -0.154928
+    },
+    "clf_severity_f1": {
+      "pooled": 0.438679,
+      "validation": 0.249427,
+      "delta": 0.189252
+    },
+    "clf_p1_recall": {
+      "pooled": 0.0,
+      "validation": 0.0,
+      "delta": 0.0
+    }
+  },
+  "proximity": {
+    "folds_mean": 0.157148,
+    "folds_min": 0.090445,
+    "folds_max": 0.221345,
+    "validation": 0.255761,
+    "note": "средний косинус до ближайшей карточки своей услуги в индексе"
+  },
+  "class_shares": {
+    "severity": {
+      "train": {
+        "P1": 0.041667,
+        "P2": 0.358611,
+        "P3": 0.483056,
+        "P4": 0.116667
+      },
+      "validation": {
+        "P1": 0.08,
+        "P2": 0.465833,
+        "P3": 0.368333,
+        "P4": 0.085833
+      }
+    }
+  },
+  "seconds": 13.56,
+  "input_hashes": {
+    "train": "d641ceb644b0a25be5a869bb1e8e97bc9b786c28b88cb0117a880a4666b071f2",
+    "validation": "73f5e83f4027c6ee44702e8a9a7541fd9c9404c9641a7991504b38fb87279079"
+  }
+}

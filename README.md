@@ -226,6 +226,8 @@ python src/experiment.py run
   [матрица выбора](docs/lab10/architecture_matrix.md),
   [схема компонентов и отказов](docs/lab10/architecture.md),
   [ADR-01, инструменты и допущения](docs/lab10/architecture_decision.md)
+- Диагностика: [устойчивость результата по 14 сценариям](docs/diagnostics/scenario_cv.md) —
+  leave-one-scenario-out на train и цена того, что validation оказался оптимистичной выборкой
 
 ## Ограничения
 
