@@ -1,0 +1,45 @@
+{
+  "incident_id": "I000280",
+  "text": "После ротации сертификата TLS-соединение не устанавливается на host-kzn182. cert_days_left держится -7 дней при пороге -2 дней. Интеграция с внешней системой недоступна. Объект CI-444998.",
+  "service": "external",
+  "root_cause": "change",
+  "severity": "P2",
+  "hits": [
+    {
+      "rank": 1,
+      "incident_id": "I003006",
+      "score": 0.375172,
+      "grade": 2
+    },
+    {
+      "rank": 2,
+      "incident_id": "I003946",
+      "score": 0.372157,
+      "grade": 1
+    },
+    {
+      "rank": 3,
+      "incident_id": "I002164",
+      "score": 0.354282,
+      "grade": 0
+    }
+  ],
+  "grades": [
+    2,
+    1,
+    0
+  ],
+  "ideal_grades": [
+    2,
+    2,
+    2
+  ],
+  "dcg": 3.63093,
+  "idcg": 6.39279,
+  "ndcg": 0.567973,
+  "mrr": 1.0,
+  "counts": {
+    "grade_two": 514,
+    "grade_one": 514
+  }
+}

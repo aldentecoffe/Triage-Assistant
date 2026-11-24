@@ -1,0 +1,187 @@
+{
+  "version": "1.0",
+  "grading_rules": {
+    "v2": "2 — та же root_cause (услуга любая); 1 — та же service при другой причине; 0 — не совпало ни то, ни другое",
+    "v1": "2 — совпали service и root_cause; 1 — совпал service или root_cause; 0 — не совпало ни то, ни другое",
+    "active": "v2"
+  },
+  "thresholds": {
+    "alpha_rule": "baseline NDCG@3 + 0.1",
+    "alpha": 0.513059,
+    "protective_rule": "причина в top-3 у P1 и NDCG@3 у P1 не ниже baseline; пустых выдач 0",
+    "protective": {
+      "p1_cause_hit": 0.0625,
+      "p1_ndcg_v2": 0.271434,
+      "empty": 0
+    }
+  },
+  "ndcg": {
+    "v2": 0.413059,
+    "v1": 0.628841,
+    "delta": -0.215782
+  },
+  "recall": {
+    "v2": 0.731667
+  },
+  "mrr": {
+    "v2": 0.674028
+  },
+  "queries": 1200,
+  "scored_queries": 1200,
+  "empty_outputs": 0,
+  "short_outputs": 0,
+  "no_relevant_queries": 0,
+  "ideal": {
+    "uniform": true,
+    "grades": [
+      2,
+      2,
+      2
+    ],
+    "rule": "идеал из трёх оценок 2, потому что у каждого запроса в индексе есть карточки той же причины"
+  },
+  "p1": {
+    "queries": 96,
+    "scenarios": [
+      "SC-IMS-03"
+    ],
+    "services": [
+      "ims"
+    ],
+    "causes": [
+      "software"
+    ],
+    "gap": -0.250899
+  },
+  "patterns": {
+    "counts": {
+      "0,0,0": 322,
+      "1,1,1": 298,
+      "2,2,2": 277,
+      "0,0,1": 32,
+      "1,1,0": 30,
+      "0,0,2": 26,
+      "2,2,0": 20,
+      "1,0,0": 20,
+      "2,1,2": 19,
+      "1,0,1": 15,
+      "0,2,2": 14,
+      "2,0,2": 13,
+      "2,0,0": 13,
+      "0,2,0": 12,
+      "2,0,1": 11,
+      "0,1,0": 11,
+      "2,2,1": 10,
+      "0,2,1": 10,
+      "0,1,1": 9,
+      "1,1,2": 8,
+      "1,0,2": 7,
+      "2,1,0": 5,
+      "0,1,2": 5,
+      "1,2,2": 5,
+      "1,2,0": 4,
+      "1,2,1": 2,
+      "2,1,1": 2
+    },
+    "largest": {
+      "pattern": "0,0,0",
+      "count": 322
+    }
+  },
+  "noise": {
+    "rule": "доля косинуса top-1 на служебных словах, единицах и цифрах; список в STOP_WORDS",
+    "above_50": 189,
+    "above_30": 715,
+    "median": 0.335292,
+    "stop_words_present": 29,
+    "stop_word_list_size": 137
+  },
+  "gap": {
+    "rule": "сходство с ближайшей карточкой той же причины минус сходство с ближайшей карточкой той же услуги и другой причины",
+    "tie": 0.01,
+    "cause_closer": 498,
+    "service_closer": 552,
+    "median": 0.000441,
+    "service_closer_mean": -0.174949,
+    "query_correlation": 0.51171,
+    "scenario_correlation": 0.856621
+  },
+  "cause_rank": {
+    "rule": "позиция лучшей карточки той же причины в полной выдаче; 0 — таких карточек нет",
+    "median": 15,
+    "within_10": 0.4725,
+    "within_50": 0.586667
+  },
+  "ceiling": {
+    "top_3": 0.433467,
+    "top_10": 0.544296,
+    "top_25": 0.616395,
+    "top_50": 0.660456
+  },
+  "ideal_grade_two_by_scale": {
+    "v2": 1200,
+    "v1": 0
+  },
+  "errors": {
+    "Причина не найдена в top-3": {
+      "count": 737,
+      "denominator": 1200
+    },
+    "Причина найдена, но не первой": {
+      "count": 93,
+      "denominator": 1200
+    },
+    "Ни услуги, ни причины": {
+      "count": 322,
+      "denominator": 1200
+    },
+    "Причина не найдена у P1": {
+      "count": 90,
+      "denominator": 96
+    },
+    "Причина дальше, чем услуга": {
+      "count": 552,
+      "denominator": 1200
+    },
+    "Сходство top-1 больше чем наполовину на служебных словах": {
+      "count": 189,
+      "denominator": 1200
+    },
+    "Пустая выдача": {
+      "count": 0,
+      "denominator": 1200
+    },
+    "Запрос без релевантных объектов": {
+      "count": 0,
+      "denominator": 1200
+    },
+    "Оценка 2 недостижима по шкале v1": {
+      "count": 1200,
+      "denominator": 1200
+    },
+    "Дефект текста IMS-02": {
+      "count": 3,
+      "denominator": 150
+    },
+    "Дефекты модуля, найденные тестами": {
+      "count": 8,
+      "denominator": 8
+    }
+  },
+  "vocabulary_hash": "44c848662e62332db0c179052fa1b8846e3fccb10e0da4c78dcfc601f228574e",
+  "environment": {
+    "python": "3.12.10",
+    "scikit_learn": "1.9.1",
+    "pandas": "3.1.1",
+    "numpy": "2.5.5"
+  },
+  "inputs": {
+    "train": "data/processed/incidents_train_v1.1.csv",
+    "validation": "data/processed/incidents_validation_v1.1.csv",
+    "test": "data/processed/incidents_test_v1.1.csv"
+  },
+  "validation_text_length": {
+    "median": 158,
+    "p95": 193
+  }
+}

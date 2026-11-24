@@ -1,0 +1,2 @@
+label,queries,ndcg_v2,recall_v2,mrr_v2,cause_exact_hit,service_hit,gap,empty,ndcg_v1
+Все запросы,1200,0.413059,0.731667,0.674028,0.385833,0.419167,-0.025115,0,0.628841
