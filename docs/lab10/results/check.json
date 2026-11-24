@@ -1,0 +1,930 @@
+{
+  "version": "1.0",
+  "data_version": "1.1",
+  "splits_used": [
+    "train",
+    "validation"
+  ],
+  "test_used": false,
+  "selection_split": "validation",
+  "queries": 1200,
+  "train_cards": 3600,
+  "classes": {
+    "taxonomy": {
+      "severity": [
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "service": [
+        "billing",
+        "bss",
+        "database",
+        "external",
+        "ims",
+        "platform",
+        "transport"
+      ],
+      "root_cause": [
+        "capacity",
+        "change",
+        "external_dep",
+        "hardware",
+        "network",
+        "software"
+      ]
+    },
+    "missing_in_train": {
+      "severity": [],
+      "service": [],
+      "root_cause": []
+    },
+    "note": "классы берутся из таксономии, поэтому F1-macro не зависит от состава train"
+  },
+  "contract": {
+    "endpoint": "POST /predict",
+    "request_fields": [
+      "title",
+      "description",
+      "monitoring_source",
+      "region"
+    ],
+    "data_field_map": {
+      "monitoring_source": "source_system"
+    },
+    "min_tokens": 5,
+    "max_chars": 4000,
+    "note": "имена полей взяты из README, а не придуманы в схеме"
+  },
+  "features": {
+    "params": {
+      "analyzer": "word",
+      "lowercase": true,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "min_df": 2,
+      "max_features": 20000,
+      "sublinear_tf": true
+    },
+    "vocabulary_size": 3799,
+    "vocabulary_sha256": "44c848662e62332db0c179052fa1b8846e3fccb10e0da4c78dcfc601f228574e",
+    "manifest": {
+      "path": "docs\\lab6\\features_manifest.json",
+      "checked": true,
+      "expected": "44c848662e62332db0c179052fa1b8846e3fccb10e0da4c78dcfc601f228574e",
+      "actual": "44c848662e62332db0c179052fa1b8846e3fccb10e0da4c78dcfc601f228574e",
+      "match": true
+    }
+  },
+  "variants": {
+    "vote": {
+      "rule": "метка = сумма косинусов соседей; ничья — ближайший сосед, затем алфавит",
+      "per_k": {
+        "3": {
+          "abstained": 0,
+          "targets": {
+            "severity": {
+              "accuracy": 0.499167,
+              "f1_macro": 0.419401,
+              "support": {
+                "P1": 96,
+                "P2": 559,
+                "P3": 442,
+                "P4": 103
+              },
+              "recall": {
+                "P1": 0.40625,
+                "P2": 0.500894,
+                "P3": 0.608597,
+                "P4": 0.106796
+              },
+              "p1_recall": 0.40625
+            },
+            "service": {
+              "accuracy": 0.325,
+              "f1_macro": 0.301274,
+              "support": {
+                "billing": 171,
+                "bss": 171,
+                "database": 172,
+                "external": 171,
+                "ims": 171,
+                "platform": 172,
+                "transport": 172
+              },
+              "recall": {
+                "billing": 0.076023,
+                "bss": 0.426901,
+                "database": 0.25,
+                "external": 0.040936,
+                "ims": 0.754386,
+                "platform": 0.284884,
+                "transport": 0.44186
+              }
+            },
+            "root_cause": {
+              "accuracy": 0.318333,
+              "f1_macro": 0.204559,
+              "support": {
+                "capacity": 172,
+                "change": 342,
+                "external_dep": 171,
+                "hardware": 172,
+                "network": 0,
+                "software": 343
+              },
+              "recall": {
+                "capacity": 0.616279,
+                "change": 0.663743,
+                "external_dep": 0.011696,
+                "hardware": 0.127907,
+                "network": 0.0,
+                "software": 0.072886
+              }
+            }
+          }
+        },
+        "5": {
+          "abstained": 0,
+          "targets": {
+            "severity": {
+              "accuracy": 0.5075,
+              "f1_macro": 0.415672,
+              "support": {
+                "P1": 96,
+                "P2": 559,
+                "P3": 442,
+                "P4": 103
+              },
+              "recall": {
+                "P1": 0.40625,
+                "P2": 0.502683,
+                "P3": 0.635747,
+                "P4": 0.07767
+              },
+              "p1_recall": 0.40625
+            },
+            "service": {
+              "accuracy": 0.34,
+              "f1_macro": 0.312256,
+              "support": {
+                "billing": 171,
+                "bss": 171,
+                "database": 172,
+                "external": 171,
+                "ims": 171,
+                "platform": 172,
+                "transport": 172
+              },
+              "recall": {
+                "billing": 0.099415,
+                "bss": 0.403509,
+                "database": 0.296512,
+                "external": 0.005848,
+                "ims": 0.807018,
+                "platform": 0.255814,
+                "transport": 0.511628
+              }
+            },
+            "root_cause": {
+              "accuracy": 0.321667,
+              "f1_macro": 0.199611,
+              "support": {
+                "capacity": 172,
+                "change": 342,
+                "external_dep": 171,
+                "hardware": 172,
+                "network": 0,
+                "software": 343
+              },
+              "recall": {
+                "capacity": 0.610465,
+                "change": 0.704678,
+                "external_dep": 0.0,
+                "hardware": 0.098837,
+                "network": 0.0,
+                "software": 0.067055
+              }
+            }
+          }
+        },
+        "10": {
+          "abstained": 0,
+          "targets": {
+            "severity": {
+              "accuracy": 0.516667,
+              "f1_macro": 0.425056,
+              "support": {
+                "P1": 96,
+                "P2": 559,
+                "P3": 442,
+                "P4": 103
+              },
+              "recall": {
+                "P1": 0.458333,
+                "P2": 0.504472,
+                "P3": 0.647059,
+                "P4": 0.07767
+              },
+              "p1_recall": 0.458333
+            },
+            "service": {
+              "accuracy": 0.333333,
+              "f1_macro": 0.307718,
+              "support": {
+                "billing": 171,
+                "bss": 171,
+                "database": 172,
+                "external": 171,
+                "ims": 171,
+                "platform": 172,
+                "transport": 172
+              },
+              "recall": {
+                "billing": 0.093567,
+                "bss": 0.362573,
+                "database": 0.313953,
+                "external": 0.0,
+                "ims": 0.777778,
+                "platform": 0.25,
+                "transport": 0.534884
+              }
+            },
+            "root_cause": {
+              "accuracy": 0.336667,
+              "f1_macro": 0.206747,
+              "support": {
+                "capacity": 172,
+                "change": 342,
+                "external_dep": 171,
+                "hardware": 172,
+                "network": 0,
+                "software": 343
+              },
+              "recall": {
+                "capacity": 0.575581,
+                "change": 0.769006,
+                "external_dep": 0.011696,
+                "hardware": 0.093023,
+                "network": 0.0,
+                "software": 0.069971
+              }
+            }
+          }
+        }
+      }
+    },
+    "classifiers": {
+      "params": {
+        "solver": "lbfgs",
+        "C": 1.0,
+        "max_iter": 2000,
+        "class_weight": "balanced"
+      },
+      "targets": {
+        "severity": {
+          "accuracy": 0.465833,
+          "f1_macro": 0.249427,
+          "support": {
+            "P1": 96,
+            "P2": 559,
+            "P3": 442,
+            "P4": 103
+          },
+          "recall": {
+            "P1": 0.0,
+            "P2": 0.366726,
+            "P3": 0.800905,
+            "P4": 0.0
+          },
+          "p1_recall": 0.0,
+          "predicted": {
+            "P2": 407,
+            "P3": 793
+          }
+        },
+        "service": {
+          "accuracy": 0.295833,
+          "f1_macro": 0.280969,
+          "support": {
+            "billing": 171,
+            "bss": 171,
+            "database": 172,
+            "external": 171,
+            "ims": 171,
+            "platform": 172,
+            "transport": 172
+          },
+          "recall": {
+            "billing": 0.187135,
+            "bss": 0.409357,
+            "database": 0.023256,
+            "external": 0.0,
+            "ims": 0.812865,
+            "platform": 0.005814,
+            "transport": 0.633721
+          },
+          "predicted": {
+            "billing": 103,
+            "bss": 239,
+            "database": 203,
+            "external": 57,
+            "ims": 168,
+            "platform": 202,
+            "transport": 228
+          }
+        },
+        "root_cause": {
+          "accuracy": 0.369167,
+          "f1_macro": 0.266042,
+          "support": {
+            "capacity": 172,
+            "change": 342,
+            "external_dep": 171,
+            "hardware": 172,
+            "network": 0,
+            "software": 343
+          },
+          "recall": {
+            "capacity": 1.0,
+            "change": 0.532164,
+            "external_dep": 0.0,
+            "hardware": 0.325581,
+            "network": 0.0,
+            "software": 0.09621
+          },
+          "predicted": {
+            "capacity": 862,
+            "change": 183,
+            "hardware": 107,
+            "software": 48
+          }
+        }
+      },
+      "gate": {
+        "severity": [
+          {
+            "threshold": 0.0,
+            "covered": 1200,
+            "coverage": 1.0,
+            "accuracy": 0.465833,
+            "f1_macro": 0.249427,
+            "p1_total": 96,
+            "p1_recall": 0.0
+          },
+          {
+            "threshold": 0.3,
+            "covered": 1200,
+            "coverage": 1.0,
+            "accuracy": 0.465833,
+            "f1_macro": 0.249427,
+            "p1_total": 96,
+            "p1_recall": 0.0
+          },
+          {
+            "threshold": 0.4,
+            "covered": 1178,
+            "coverage": 0.981667,
+            "accuracy": 0.474533,
+            "f1_macro": 0.252366,
+            "p1_total": 96,
+            "p1_recall": 0.0
+          },
+          {
+            "threshold": 0.5,
+            "covered": 947,
+            "coverage": 0.789167,
+            "accuracy": 0.537487,
+            "f1_macro": 0.277325,
+            "p1_total": 96,
+            "p1_recall": 0.0
+          },
+          {
+            "threshold": 0.6,
+            "covered": 725,
+            "coverage": 0.604167,
+            "accuracy": 0.565517,
+            "f1_macro": 0.291434,
+            "p1_total": 96,
+            "p1_recall": 0.0
+          },
+          {
+            "threshold": 0.7,
+            "covered": 416,
+            "coverage": 0.346667,
+            "accuracy": 0.46875,
+            "f1_macro": 0.237971,
+            "p1_total": 96,
+            "p1_recall": 0.0
+          }
+        ],
+        "service": [
+          {
+            "threshold": 0.0,
+            "covered": 1200,
+            "coverage": 1.0,
+            "accuracy": 0.295833,
+            "f1_macro": 0.280969
+          },
+          {
+            "threshold": 0.3,
+            "covered": 491,
+            "coverage": 0.409167,
+            "accuracy": 0.439919,
+            "f1_macro": 0.355859
+          },
+          {
+            "threshold": 0.4,
+            "covered": 181,
+            "coverage": 0.150833,
+            "accuracy": 0.535912,
+            "f1_macro": 0.276211
+          },
+          {
+            "threshold": 0.5,
+            "covered": 39,
+            "coverage": 0.0325,
+            "accuracy": 0.692308,
+            "f1_macro": 0.257143
+          },
+          {
+            "threshold": 0.6,
+            "covered": 12,
+            "coverage": 0.01,
+            "accuracy": 0.833333,
+            "f1_macro": 0.25
+          },
+          {
+            "threshold": 0.7,
+            "covered": 0,
+            "coverage": 0.0,
+            "accuracy": null,
+            "f1_macro": null
+          }
+        ],
+        "root_cause": [
+          {
+            "threshold": 0.0,
+            "covered": 1200,
+            "coverage": 1.0,
+            "accuracy": 0.369167,
+            "f1_macro": 0.266042
+          },
+          {
+            "threshold": 0.3,
+            "covered": 1115,
+            "coverage": 0.929167,
+            "accuracy": 0.364126,
+            "f1_macro": 0.252461
+          },
+          {
+            "threshold": 0.4,
+            "covered": 777,
+            "coverage": 0.6475,
+            "accuracy": 0.344916,
+            "f1_macro": 0.203419
+          },
+          {
+            "threshold": 0.5,
+            "covered": 548,
+            "coverage": 0.456667,
+            "accuracy": 0.375912,
+            "f1_macro": 0.202078
+          },
+          {
+            "threshold": 0.6,
+            "covered": 321,
+            "coverage": 0.2675,
+            "accuracy": 0.429907,
+            "f1_macro": 0.158919
+          },
+          {
+            "threshold": 0.7,
+            "covered": 99,
+            "coverage": 0.0825,
+            "accuracy": 0.545455,
+            "f1_macro": 0.117647
+          }
+        ]
+      },
+      "gate_rule": "alpha показывает метку только при уверенности не ниже порога; ниже порога выводится «нужно решение инженера»"
+    },
+    "severity_rule": {
+      "phrases": 84,
+      "covered": 1200,
+      "coverage": 1.0,
+      "accuracy_on_covered": 1.0,
+      "f1_macro_on_all": 1.0,
+      "note": "на синтетическом наборе правило воспроизводит определение метки из ЛР 6, поэтому качество на покрытых карточках измеряет согласованность с определением, а не перенос на реальные тексты"
+    },
+    "severity_hybrid": {
+      "accuracy": 1.0,
+      "f1_macro": 1.0,
+      "support": {
+        "P1": 96,
+        "P2": 559,
+        "P3": 442,
+        "P4": 103
+      },
+      "recall": {
+        "P1": 1.0,
+        "P2": 1.0,
+        "P3": 1.0,
+        "P4": 1.0
+      },
+      "p1_recall": 1.0
+    },
+    "vote_agreement": {
+      "rule": "победа одной метки собрала не меньше 0.5 веса трёх соседей",
+      "threshold": 0.5,
+      "targets": {
+        "service": {
+          "solid_queries": 1051,
+          "split_queries": 149,
+          "solid_share": 0.875833,
+          "solid": {
+            "accuracy": 0.346337,
+            "f1_macro": 0.309322,
+            "support": {
+              "billing": 154,
+              "bss": 153,
+              "database": 150,
+              "external": 130,
+              "ims": 163,
+              "platform": 160,
+              "transport": 141
+            },
+            "recall": {
+              "billing": 0.077922,
+              "bss": 0.431373,
+              "database": 0.24,
+              "external": 0.0,
+              "ims": 0.785276,
+              "platform": 0.30625,
+              "transport": 0.51773
+            }
+          },
+          "split": {
+            "accuracy": 0.174497,
+            "f1_macro": 0.148548,
+            "support": {
+              "billing": 17,
+              "bss": 18,
+              "database": 22,
+              "external": 41,
+              "ims": 8,
+              "platform": 12,
+              "transport": 31
+            },
+            "recall": {
+              "billing": 0.058824,
+              "bss": 0.388889,
+              "database": 0.318182,
+              "external": 0.170732,
+              "ims": 0.125,
+              "platform": 0.0,
+              "transport": 0.096774
+            }
+          }
+        },
+        "root_cause": {
+          "solid_queries": 1094,
+          "split_queries": 106,
+          "solid_share": 0.911667,
+          "solid": {
+            "accuracy": 0.327239,
+            "f1_macro": 0.201547,
+            "support": {
+              "capacity": 157,
+              "change": 302,
+              "external_dep": 163,
+              "hardware": 143,
+              "network": 0,
+              "software": 329
+            },
+            "recall": {
+              "capacity": 0.66879,
+              "change": 0.718543,
+              "external_dep": 0.0,
+              "hardware": 0.083916,
+              "network": 0.0,
+              "software": 0.072948
+            }
+          },
+          "split": {
+            "accuracy": 0.226415,
+            "f1_macro": 0.159961,
+            "support": {
+              "capacity": 15,
+              "change": 40,
+              "external_dep": 8,
+              "hardware": 29,
+              "network": 0,
+              "software": 14
+            },
+            "recall": {
+              "capacity": 0.066667,
+              "change": 0.25,
+              "external_dep": 0.25,
+              "hardware": 0.344828,
+              "network": 0.0,
+              "software": 0.071429
+            }
+          }
+        }
+      }
+    }
+  },
+  "latency": {
+    "queries": 1200,
+    "median_ms": 1.636,
+    "mean_ms": 1.658,
+    "p95_ms": 1.803,
+    "max_ms": 2.169,
+    "rule_misses": 0,
+    "note": "принятый путь: нормализация + векторизация + косинус по индексу train + выборка top-3 + голосование по услуге + правило критичности + predict_proba классификатора причины; сериализация ответа и запись журнала не входят",
+    "index_build_ms": 205.57,
+    "model_fit_ms": 361.65
+  },
+  "index": {
+    "rows": 3600,
+    "features": 3799,
+    "non_zero": 136340,
+    "bytes": 1650484,
+    "megabytes": 1.57
+  },
+  "references": {
+    "lab7": {
+      "queries": 1200,
+      "ndcg_at_3_v1": 0.628841,
+      "service_hit_at_3": 0.419167,
+      "cause_hit_at_3": 0.385833,
+      "both_labels_at_3": 0.073333,
+      "majority_f1_macro": {
+        "severity": 0.134592,
+        "service": 0.035818,
+        "root_cause": 0.041788
+      }
+    },
+    "lab8": {
+      "ndcg_at_3_v2": 0.413059,
+      "queries": 1200,
+      "p1_gap": -0.250899,
+      "alpha": 0.513059
+    },
+    "lab9": {
+      "delta_ndcg": 0.067105,
+      "candidate_ndcg": 0.480164,
+      "reranker_accuracy": 0.369167,
+      "saturated_share": 0.718333,
+      "ceiling": {
+        "top_3": 0.433467,
+        "top_10": 0.544296,
+        "top_25": 0.616395,
+        "top_50": 0.660456
+      }
+    }
+  },
+  "reference_checks": {
+    "checked": true,
+    "lab9_reranker_accuracy": 0.369167,
+    "accuracy_now": 0.369167,
+    "match": true
+  },
+  "selection": {
+    "rule": "Для каждой метки берётся вариант с наибольшим F1-macro на validation. Если разница не больше 0,01, выбирается вариант с меньшим числом артефактов: гибрид «правило плюс классификатор» проще отдельного классификатора, классификатор проще голосования по соседям, голосование проще правила без запасного пути. Test в выборе не участвует. Бюджет задержки и цели проекта — отдельные ворота: вариант, у которого p95 выше 1 000 мс, не выбирается даже при лучшем F1, а недостижение цели плана записывается как известное ограничение, а не как повод сменить правило.",
+    "chosen": {
+      "severity": "hybrid",
+      "service": "vote",
+      "root_cause": "classifier"
+    },
+    "decision": {
+      "severity": {
+        "method": "hybrid",
+        "note": "правило ставит метку, классификатор включается только там, где фразы последствия нет"
+      },
+      "service": {
+        "method": "vote",
+        "k": 3,
+        "reason": "метка объясняется теми же карточками, которые инженер видит в ответе"
+      },
+      "root_cause": {
+        "method": "classifier"
+      }
+    },
+    "detail": {
+      "severity": {
+        "f1_macro": {
+          "vote": 0.419401,
+          "classifier": 0.249427,
+          "hybrid": 1.0,
+          "rule": 1.0
+        },
+        "chosen": "hybrid",
+        "lead_over_runner_up": 0.0
+      },
+      "service": {
+        "f1_macro": {
+          "vote": 0.301274,
+          "classifier": 0.280969
+        },
+        "chosen": "vote",
+        "lead_over_runner_up": 0.020305
+      },
+      "root_cause": {
+        "f1_macro": {
+          "vote": 0.204559,
+          "classifier": 0.266042
+        },
+        "chosen": "classifier",
+        "lead_over_runner_up": 0.061483
+      }
+    },
+    "ceiling": {
+      "best_k": 10,
+      "by_k": {
+        "3": {
+          "targets": {
+            "severity": 0.419401,
+            "service": 0.301274,
+            "root_cause": 0.204559
+          },
+          "mean_f1_macro": 0.308411
+        },
+        "5": {
+          "targets": {
+            "severity": 0.415672,
+            "service": 0.312256,
+            "root_cause": 0.199611
+          },
+          "mean_f1_macro": 0.30918
+        },
+        "10": {
+          "targets": {
+            "severity": 0.425056,
+            "service": 0.307718,
+            "root_cause": 0.206747
+          },
+          "mean_f1_macro": 0.313174
+        }
+      },
+      "cost_of_showing_top3": {
+        "severity": 0.005655,
+        "service": 0.006444,
+        "root_cause": 0.002188
+      },
+      "note": "потолок по F1-macro; в выборе не участвует, потому что метку нельзя объяснить невидимыми карточками"
+    }
+  },
+  "gates": {
+    "plan_targets": {
+      "severity": 0.75,
+      "service": 0.8,
+      "root_cause": 0.65,
+      "p1_recall": 0.9,
+      "p95_latency_ms": 1000.0
+    },
+    "adopted_f1_macro": {
+      "severity": 1.0,
+      "service": 0.301274,
+      "root_cause": 0.266042
+    },
+    "targets_met": {
+      "severity": true,
+      "service": false,
+      "root_cause": false
+    },
+    "p1_recall": 1.0,
+    "p1_recall_met": true,
+    "latency_budget_ms": 1000.0,
+    "latency_p95_ms": 1.803,
+    "latency_met": true,
+    "note": "критичность измеряется по правилу из ЛР 6, то есть по определению метки; выполнение цели на синтетике не доказывает качество на реальных карточках"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "scikit_learn": "1.9.1",
+    "pandas": "3.1.1",
+    "numpy": "2.5.5"
+  },
+  "tools": [
+    {
+      "name": "python",
+      "role": "интерпретатор; все вычисления выполняются локально",
+      "version": "3.12.10",
+      "license": "PSF-2.0",
+      "installed": true,
+      "used_in_src": true,
+      "used_in_tests": true,
+      "status": "используется"
+    },
+    {
+      "name": "numpy",
+      "role": "разреженные операции и косинусная близость",
+      "version": "2.5.5",
+      "license": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+      "installed": true,
+      "used_in_src": true,
+      "used_in_tests": true,
+      "status": "используется"
+    },
+    {
+      "name": "pandas",
+      "role": "чтение выборок и таблиц отчёта",
+      "version": "3.1.1",
+      "license": "BSD-3-Clause",
+      "installed": true,
+      "used_in_src": true,
+      "used_in_tests": true,
+      "status": "используется"
+    },
+    {
+      "name": "scikit-learn",
+      "role": "TF-IDF, LogisticRegression, метрики",
+      "version": "1.9.1",
+      "license": "BSD-3-Clause",
+      "installed": true,
+      "used_in_src": true,
+      "used_in_tests": true,
+      "status": "используется"
+    },
+    {
+      "name": "scipy",
+      "role": "разреженные матрицы под scikit-learn",
+      "version": "1.18.1",
+      "license": "BSD License",
+      "installed": true,
+      "used_in_src": true,
+      "used_in_tests": true,
+      "status": "используется"
+    },
+    {
+      "name": "joblib",
+      "role": "сохранение артефакта модели",
+      "version": "1.6.0",
+      "license": "BSD-3-Clause",
+      "installed": true,
+      "used_in_src": false,
+      "used_in_tests": false,
+      "status": "установлен, напрямую не импортируется"
+    },
+    {
+      "name": "matplotlib",
+      "role": "схема компонентов для отчёта",
+      "version": "3.11.2",
+      "license": "Python Software Foundation License",
+      "installed": true,
+      "used_in_src": true,
+      "used_in_tests": false,
+      "status": "используется"
+    },
+    {
+      "name": "fastapi",
+      "role": "локальный HTTP-интерфейс alpha",
+      "version": null,
+      "license": null,
+      "installed": false,
+      "used_in_src": false,
+      "used_in_tests": false,
+      "status": "план: не установлен"
+    },
+    {
+      "name": "uvicorn",
+      "role": "запуск FastAPI без внешних сервисов",
+      "version": null,
+      "license": null,
+      "installed": false,
+      "used_in_src": false,
+      "used_in_tests": false,
+      "status": "план: не установлен"
+    },
+    {
+      "name": "pydantic",
+      "role": "схема запроса и валидация",
+      "version": null,
+      "license": null,
+      "installed": false,
+      "used_in_src": false,
+      "used_in_tests": false,
+      "status": "план: не установлен"
+    },
+    {
+      "name": "pytest",
+      "role": "тесты модуля",
+      "version": "9.2.0",
+      "license": "MIT",
+      "installed": true,
+      "used_in_src": false,
+      "used_in_tests": true,
+      "status": "только в тестах"
+    }
+  ],
+  "input_hashes": {
+    "train": "d641ceb644b0a25be5a869bb1e8e97bc9b786c28b88cb0117a880a4666b071f2",
+    "validation": "73f5e83f4027c6ee44702e8a9a7541fd9c9404c9641a7991504b38fb87279079"
+  }
+}
